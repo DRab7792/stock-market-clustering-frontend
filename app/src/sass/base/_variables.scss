@@ -1,0 +1,90 @@
+// Neat Overrides
+$max-width: 1175px;
+$max-width-small: 880px;
+
+// Breakpoints
+$medium-screen: 600px;
+$large-screen: 900px;
+$tablet: 768px;
+$header-breakpoint: 890px;
+
+// Heights
+$activity-bar-width: 350px;
+
+// Typography
+$base-font-family: 'GT-Walsheim-Medium', sans-serif;
+$heading-font-family: 'GT-Walsheim-Bold', sans-serif;
+$secondary-font-family: 'GT-Pressura-Regular', sans-serif;
+
+// Font Sizes
+$base-font-size: 1em;
+
+// Line height
+$base-line-height: 1.5;
+$heading-line-height: 1.2;
+
+// Other Sizes
+$base-border-radius: 3px;
+$button-border-radius: 50px;
+$base-spacing: $base-line-height * 1em;
+$small-spacing: $base-spacing / 2;
+$base-z-index: 0;
+
+// Random
+$show-letter-spacing: 0.5px;
+
+// Colors
+$color-lightest-gray: #eee;
+$color-lighter-gray: #d9d9d9;
+$color-light-gray: #b3b3b3;
+$color-medium-gray: #858585;
+$color-dark-gray: #454545;
+$color-darker-gray: #353535;
+$color-darkest-gray: #252525;
+$color-teal-light: #3bf2c2;
+$color-teal-dark: #32c69f;
+$color-teal-lightest: #e2fdf6;
+$color-red-light: #ff6666;
+
+
+
+
+
+
+// to remove
+$dark-gray-text: #333333;
+$primary-color: $color-darkest-gray;
+
+$bright-green: #cf9;
+$bright-aqua: #6fc;
+$bright-blue: #0ff;
+$mutated-green: #9c6;
+$mutated-aqua: #6c9;
+$mutated-blue: #0cc;
+
+$blue: #3280e0;
+$dark-gray: #505050;
+$medium-gray: #414141;
+$light-gray: #eeeeee;
+$error: #ff0000;
+$success: #43A243;
+
+// Font Colors
+$base-font-color: $dark-gray;
+$action-color: $blue;
+
+// Border
+$base-border-color: $light-gray;
+$base-border: 1px solid $base-border-color;
+
+// Background Colors
+$base-background-color: #fff;
+$secondary-background-color: tint($base-border-color, 75%);
+
+// Forms
+$form-box-shadow: inset 0 1px 3px rgba(#000, 0.06);
+$form-box-shadow-focus: $form-box-shadow, 0 0 5px adjust-color($action-color, $lightness: -5%, $alpha: -0.3);
+
+// Animations
+$base-duration: 300ms;
+$base-timing: ease-in-out;

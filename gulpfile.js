@@ -2,10 +2,23 @@
 
 var gulp = require('gulp'),
 	electron = require('gulp-electron'),
-	packageJson = require('./app/package.json');
+	concat = require('gulp-concat'),
+	packageJson = require('./app/package.json'),
+	cleanCSS = require('gulp-clean-css'),
+	sass = require('gulp-sass');
 
 
-
+//Compile sass into a single minified css file
+gulp.task('sass', function(){
+	return gulp.src("app/src/sass/index.scss")
+		.pipe(sass().on('error', sass.logError))
+		.pipe(concat("style.css"))
+		.pipe(cleanCSS({
+			keepSpecialComments: 0,
+			processImport: false
+    	}).on('error', sass.logError))
+    	.pipe(gulp.dest("app/build/css"))
+});
 
 
 //Package the final product into an app for Windows, Linux and Mac
@@ -21,7 +34,7 @@ gulp.task('package', function() {
         rebuild: false,
         packaging: true,
         // asar: true,
-        platforms: ['darwin-x64'],
+        platforms: ['win32-ia32', 'darwin-x64', 'linux-x64'],
         platformResources: {
             darwin: {
                 CFBundleDisplayName: packageJson.name,
