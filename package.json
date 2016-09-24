@@ -1,0 +1,43 @@
+{
+  "name": "stock-market-clustering-frontend",
+  "version": "0.0.1",
+  "bundle": "com.stock-clustering",
+  "description": "Ana analysis of the stock market through clustering techniques.",
+  "main": "src/app.js",
+  "scripts": {
+    "test": "DEBUG=web ./index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/DRab7792/big-data-final-frontend.git"
+  },
+  "keywords": [
+    "stock",
+    "market",
+    "clustering",
+    "k-means"
+  ],
+  "author": "Dan Rabinowitz",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/DRab7792/big-data-final-frontend#readme",
+  "dependencies": {
+    "async": "^1.5.2",
+    "bootstrap-sass": "^3.3.6",
+    "gulp-concat": "^2.5.2",
+    "jquery": "^2.1.3",
+    "moment": "^2.12.0",
+    "react": "^0.14.5",
+    "underscore": "^1.8.2"
+  },
+  "devDependencies": {
+    "electron-prebuilt": "^1.4.1",
+    "gulp": "^3.9.1",
+    "gulp-electron": "^0.1.3",
+    "gulp-sass": "^2.2.0",
+    "gulp-uglify": "^1.5.1",
+    "gulp-uglifyjs": "^0.6.1",
+    "gulp-watch": "^4.3.5",
+    "react-dom": "^0.14.5",
+    "watchify": "~3.6.1"
+  }
+}
