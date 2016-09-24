@@ -5,13 +5,15 @@ var gulp = require('gulp'),
 	concat = require('gulp-concat'),
 	imagemin = require('gulp-imagemin'),
 	browserify = require('browserify'),
+	ejs = require('gulp-ejs'),
+	config = require('./app/src/js/config.js'),
 	source = require('vinyl-source-stream'),
 	reactify = require('reactify'),
 	run = require('gulp-run'),
 	watchify = require('watchify'),
 	livereload = require('gulp-livereload'),
 	watch = require('gulp-watch'),
-	packageJson = require('./app/package.json'),
+	packageJson = require('./app/src/package.json'),
 	cleanCSS = require('gulp-clean-css'),
 	sass = require('gulp-sass');
 
@@ -68,6 +70,10 @@ gulp.task('watchAssets', function(){
 
 //Move index file and main js into build
 gulp.task('root', function(){
+	gulp.src("app/src/index.ejs")
+		.pipe(ejs(config, {ext: '.html'}))
+		.pipe(gulp.dest("app/build/"));
+
 	return gulp.src("app/src/*.*")
 		.pipe(gulp.dest("app/build"));
 });
@@ -127,33 +133,33 @@ gulp.task('run', function(){
 gulp.task('package', function() {
 
     gulp.src("")
-    .pipe(electron({
-        src: 'app/build',
-        packageJson: packageJson,
-        release: 'release',
-        cache: 'cache',
-        version: 'v1.4.1',
-        rebuild: false,
-        packaging: true,
-        // asar: true,
-        platforms: ['win32-ia32', 'darwin-x64', 'linux-x64'],
-        platformResources: {
-            darwin: {
-                CFBundleDisplayName: packageJson.name,
-                CFBundleIdentifier: packageJson.name,
-                CFBundleName: packageJson.name,
-                CFBundleVersion: packageJson.version,
-                icon: 'icons/gulp-electron.icns'
-            },
-            win: {
-                "version-string": packageJson.version,
-                "file-version": packageJson.version,
-                "product-version": packageJson.version,
-                icon: 'icons/gulp-electron.ico'
-            }
-        }
-    }))
-    .pipe(gulp.dest(""));
+	    .pipe(electron({
+	        src: 'app/build',
+	        packageJson: packageJson,
+	        release: 'release',
+	        cache: 'cache',
+	        version: 'v1.4.1',
+	        rebuild: false,
+	        packaging: true,
+	        // asar: true,
+	        platforms: ['darwin-x64'],
+	        platformResources: {
+	            darwin: {
+	                CFBundleDisplayName: packageJson.name,
+	                CFBundleIdentifier: packageJson.name,
+	                CFBundleName: packageJson.name,
+	                CFBundleVersion: packageJson.version,
+	                icon: 'icons/gulp-electron.icns'
+	            },
+	            win: {
+	                "version-string": packageJson.version,
+	                "file-version": packageJson.version,
+	                "product-version": packageJson.version,
+	                icon: 'icons/gulp-electron.ico'
+	            }
+	        }
+	    }))
+	    .pipe(gulp.dest(""));
 });
 
 
@@ -162,4 +168,11 @@ gulp.task('default', ['dev', 'watch']);
 gulp.task('compile', ['sass', 'js', 'assets', 'root']);
 gulp.task('watch', ['watchJs', 'watchSass', 'watchAssets']);
 gulp.task('dev', ['compile', 'run']);
-gulp.task('prod', ['package']);
+gulp.task('prod', function(){
+	gulp.start("compile");
+
+
+	setTimeout(function(){
+		gulp.start("package");
+	}, 3000);
+});
