@@ -6,6 +6,7 @@ var gulp = require('gulp'),
 	imagemin = require('gulp-imagemin'),
 	browserify = require('browserify'),
 	ejs = require('gulp-ejs'),
+	clean = require('gulp-clean'),
 	config = require('./app/src/js/config.js'),
 	source = require('vinyl-source-stream'),
 	reactify = require('reactify'),
@@ -125,6 +126,7 @@ var js = function(watch){
 
 //Run electron app from build
 gulp.task('run', function(){
+	process.env.NODE_ENV = 'dev';
 	livereload.listen();
 	return run('electron app/build/main.js').exec();
 });
@@ -171,6 +173,8 @@ gulp.task('dev', ['compile', 'run']);
 gulp.task('prod', function(){
 	gulp.start("compile");
 
+	gulp.src('release', {read: false})
+        .pipe(clean());
 
 	setTimeout(function(){
 		gulp.start("package");

@@ -3,3 +3,4 @@ var test2 = require('./test2.jsx');
 
 console.log(test2.mets);
 console.log("test");
+// console.log(window.process);

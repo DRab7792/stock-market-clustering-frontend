@@ -39,6 +39,7 @@
     "browserify": "^13.1.0",
     "electron-prebuilt": "^1.4.1",
     "gulp": "^3.9.1",
+    "gulp-clean": "^0.3.2",
     "gulp-clean-css": "^2.0.12",
     "gulp-ejs": "^2.2.0",
     "gulp-ejs-compile": "^0.1.0",
