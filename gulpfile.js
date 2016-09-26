@@ -94,7 +94,7 @@ var js = function(watch){
 		.pipe(gulp.dest("app/build/js"))
 
 	//Now compile all the js
-	var script = 'app/src/js/app.jsx';
+	var script = 'app/src/js/index.js';
 	var bundler;
 
 	if (watch){
@@ -107,6 +107,8 @@ var js = function(watch){
 	}else{
 		bundler = browserify(script);
 	}
+
+	bundler.transform(reactify);
 
 	var rebundle = function(){
 		gulp.start("sass");

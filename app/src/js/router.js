@@ -1,8 +1,8 @@
-var Backbone = require('backbone');
-var BackboneRouteControl = require('backbone-route-control');
+var Backbone = require('backbone'),
+	BackboneRouteControl = require('backbone-route-control');
 
 var Router = BackboneRouteControl.extend({
-	routers: {
+	routes: {
 		'': 					'pages#home',
 		'proposal': 			'pages#proposal',
 		'paper': 				'paper#overview',
@@ -11,6 +11,10 @@ var Router = BackboneRouteControl.extend({
 		'code': 				'pages#code',
 		'sources': 				'pages#sources',
 		'stack': 				'pages#stack'
+	},
+	getRoute: function(){
+		// console.log(Backbone.history);
+		return Backbone.history.location.hash;
 	}
 });
 

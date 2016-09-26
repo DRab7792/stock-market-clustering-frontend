@@ -4,7 +4,7 @@ var PageController = function(options){
 
 	return {
 		home: function(){
-			// app.mainView.pageRender()
+			console.log("Home called");
 		},
 		proposal: function(){
 
@@ -17,7 +17,7 @@ var PageController = function(options){
 		},
 		stack: function(){
 
-		},
+		}
 	}
 };
 

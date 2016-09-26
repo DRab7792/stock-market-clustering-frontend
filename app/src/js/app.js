@@ -1,6 +1,6 @@
 var Backbone = require('backbone'),
 	Router = require('./router'),
-	MainView = require('./screens/main/index'),
+	MainView = require('./views/main'),
 	PageController = require('./controllers/page'),
 	PaperController = require('./controllers/paper'),
 	config = require('./config'),
@@ -10,11 +10,12 @@ var Backbone = require('backbone'),
 Backbone.$ = $;
 
 var Application = function(){
+	// console.log("hey");
 	this.initialize();
 }
 
 Application.prototype.initialize = function(){
-	this.wpapi = new WPAPI({ endpoint: config.wpApiUrl });
+	// this.wpapi = new WPAPI({ endpoint: config.wpApiUrl });
 
 	this.controllers = {
 		pages: new PageController({ app: this }),
