@@ -2,7 +2,9 @@ config = {};
 
 config.app = {
 	title: "Stock Market Clustering",
-	wpApiUrl: "http://stockcluster.dan-rabinowitz.com/wp-json"
+	optionsUrl: "http://bigdata.dan-rabinowitz.com/options",
+	wpApiUrl: "http://bigdata.dan-rabinowitz.com/wp-json",
+	assetsUrl: "./assets/"
 }
 
 

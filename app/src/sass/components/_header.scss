@@ -1,0 +1,55 @@
+$header-padding: 12px;
+$header-logo-height: ($header-height - ($header-padding * 2));
+$nav-size: 16px;
+
+.c-header{
+	background-color: $color-primary;
+	display: block;
+	position: fixed;
+	top: 0px;
+	padding: 12px;
+	width: 100%;
+
+	&__logo{
+
+		&:hover img{
+			transition: opacity $base-duration $base-timing;
+		}
+
+		&:hover img{
+			opacity: .8;
+		}
+
+		&-icon{
+			float: left;
+			height: $header-logo-height;
+		}
+
+		&-text{
+			float: left;
+			margin-top: 5px;
+			margin-left: 10px;
+			height: ($header-logo-height - 10);
+		}
+	}
+
+	&__nav{
+		@include span-columns(6);
+		float: right;
+		text-align: right;
+	}
+
+	&__link{
+		font-family: $headers-font;
+		display: inline-block;
+		padding-left: 2%;
+		font-size: $nav-size;
+		padding-right: 2%;
+		padding-top: (($header-logo-height - $nav-size)/2);
+		padding-bottom: (($header-logo-height - $nav-size)/2);
+
+		&:last-of-type{
+			padding-right: 0px;
+		}
+	}
+}

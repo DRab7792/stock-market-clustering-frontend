@@ -5,32 +5,51 @@ var React = require('react'),
 var Header = React.createBackboneClass({
 	getInitialState: function() {
 	    return {
-			selected: ''
+			selected: '',
+			nav: []
 	    };
 	},
 	componentDidMount: function() {
-		var curRoute = this.props.router.getRoute();
-		this.setState({
-			selected: this.props.selected
+		console.log(this.props);
+		var curRoute = this.props.router.getRoute(),
+			self = this;
+
+		this.props.wpApi.getOptions(function(err, data){
+			if (err){
+				return console.log("Error getting options", err);
+			}
+
+			self.setState({
+				nav: data.nav,
+				selected: curRoute
+			});
 		});
+		
 	},
 	handleNavClick: function(el){
 		// this.props.router.navigate($());
 	},
 	render: function(){
-		var routes = this.props.router.routes;
+		// var routes = this.props.router.routes;
 
-		var links = _.map(Object.keys(routes), function(cur){
-			var url = "/#" + cur;
+		var links = _.map(this.state.nav, function(cur){
+			var url = "/#" + cur.title;
 
-			return <li key={cur}>
-				<a href={url}>{cur}</a>
+			return <li className="c-header__link" key={cur.title}>
+				<a href={url}>{cur.title}</a>
 			</li>;
-		})
+		});
 
-		return (<header>
-			<nav>
-				<ul className="c-header-navLinks">
+		var assetsUrl =  "assets/";
+
+
+		return (<header className="c-header">
+			<a href="/" className="c-header__logo">
+				<img className="c-header__logo-icon" src={assetsUrl+"logo-no-text.svg"} />
+				<img className="c-header__logo-text" src={assetsUrl+"logo-text.svg"} />
+			</a>
+			<nav className="c-header__nav l-grid8">
+				<ul className="c-header__navLinks">
 					{links}
 				</ul>
 			</nav>

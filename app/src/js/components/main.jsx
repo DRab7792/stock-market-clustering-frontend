@@ -10,9 +10,14 @@ var Main = React.createBackboneClass({
 	    };
 	},
 	render: function(){
-		return (<div id="main">
-			<Header router={this.props.router}/>
+		return (<div>
+			<Header 
+				router={this.props.app.router} 
+				wpApi={this.props.app.wpApi}
+			/>
+			<div className="p-wrapper">
 
+			</div>
 			<Footer/>
 		</div>);
 	}

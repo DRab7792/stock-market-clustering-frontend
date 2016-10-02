@@ -6,6 +6,9 @@ var gulp = require('gulp'),
 	imagemin = require('gulp-imagemin'),
 	browserify = require('browserify'),
 	ejs = require('gulp-ejs'),
+	fs = require('fs'),
+	_ = require('underscore'),
+	jsonSass = require('gulp-json-sass'),
 	clean = require('gulp-clean'),
 	config = require('./app/src/js/config.js'),
 	source = require('vinyl-source-stream'),
@@ -16,7 +19,40 @@ var gulp = require('gulp'),
 	watch = require('gulp-watch'),
 	packageJson = require('./app/src/package.json'),
 	cleanCSS = require('gulp-clean-css'),
-	sass = require('gulp-sass');
+	sass = require('gulp-sass'),
+	request = require('request');
+
+gulp.task('importSassVars', function(){
+	var url = config.app.optionsUrl;
+	request(url, function(err, res){
+
+		//Handle error
+		if (err){
+			console.log("Error getting options", err);
+			return process.exit();
+		}
+
+		//Parse results
+		var options = JSON.parse(res.body);
+
+		//Form color variables
+		var str = "";
+		_.each(options.theme.colors, function(cur){
+			str += "$color-" + cur.name + ": " + cur.color + ";\n";
+		});
+
+		//Form font variables
+		str += "\n";
+		_.each(options.theme.font, function(cur){
+			str += "@import '" + cur.url + "';\n";
+			str += "$" + cur.type + "-font: " + cur.family + ";\n\n";
+		});
+
+		//Write json file
+		fs.writeFileSync('app/src/sass/compiled/_options.scss', str);
+		
+	});
+});
 
 //Compile sass into a single minified css file and move to build
 gulp.task('sass', function(){
@@ -169,8 +205,8 @@ gulp.task('package', function() {
 
 //Define all the tasks
 gulp.task('default', ['dev', 'watch']);
-gulp.task('compile', ['sass', 'js', 'assets', 'root']);
-gulp.task('watch', ['watchJs', 'watchSass', 'watchAssets']);
+gulp.task('compile', ['importSassVars', 'sass', 'js', 'assets', 'root']);
+gulp.task('watch', ['importSassVars', 'watchJs', 'watchSass', 'watchAssets']);
 gulp.task('dev', ['compile', 'run']);
 gulp.task('prod', function(){
 	gulp.start("compile");

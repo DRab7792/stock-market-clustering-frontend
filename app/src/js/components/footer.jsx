@@ -8,8 +8,14 @@ var Footer = React.createBackboneClass({
 	    };
 	},
 	render: function(){
-		return (<footer>
+		var assetsUrl =  "assets/";
 
+
+		return (<footer className="c-footer">
+			<a href="/" className="c-footer__logo">
+				<img className="c-footer__logo__icon" src={assetsUrl+"logo-no-text.svg"} />
+			</a>
+			<span className="c-footer__copyright">Copyright 2016</span>
 		</footer>);
 	}
 });
