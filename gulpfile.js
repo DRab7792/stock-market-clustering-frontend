@@ -20,7 +20,26 @@ var gulp = require('gulp'),
 	packageJson = require('./app/src/package.json'),
 	cleanCSS = require('gulp-clean-css'),
 	sass = require('gulp-sass'),
+	icon = require('icon-gen'),
 	request = require('request');
+
+const options = {
+			report: true,
+			names:{
+				ico: 'ico-logo',
+				icns: 'icns-logo'
+			}
+		};
+
+gulp.task('icons', function(){
+	icon('./app/src/assets/logo-no-text.svg', './icons', options)
+		.then((results) => {
+			console.log(results);
+		})
+		.catch((err) => {
+			console.log(err);
+		});
+});
 
 gulp.task('importSassVars', function(){
 	var url = config.app.optionsUrl;
@@ -209,6 +228,7 @@ gulp.task('compile', ['importSassVars', 'sass', 'js', 'assets', 'root']);
 gulp.task('watch', ['importSassVars', 'watchJs', 'watchSass', 'watchAssets']);
 gulp.task('dev', ['compile', 'run']);
 gulp.task('prod', function(){
+	gulp.start("icons");
 	gulp.start("compile");
 
 	gulp.src('release', {read: false})

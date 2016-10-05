@@ -1,4 +1,5 @@
 var React = require('react'),
+	config = require('../config'),
 	ReactBackbone = require('react.backbone');
 
 var Footer = React.createBackboneClass({
@@ -8,14 +9,11 @@ var Footer = React.createBackboneClass({
 	    };
 	},
 	render: function(){
-		var assetsUrl =  "assets/";
-
+		var assetsUrl =  config.app.assetsUrl;
 
 		return (<footer className="c-footer">
-			<a href="/" className="c-footer__logo">
-				<img className="c-footer__logo__icon" src={assetsUrl+"logo-no-text.svg"} />
-			</a>
-			<span className="c-footer__copyright">Copyright 2016</span>
+			<img className="c-footer__logo__icon" src={assetsUrl+"logo-no-text.svg"} />
+			<span className="c-footer__copyright">&copy; 2016</span>
 		</footer>);
 	}
 });

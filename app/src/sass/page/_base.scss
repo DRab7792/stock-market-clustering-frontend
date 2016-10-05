@@ -3,5 +3,5 @@
 	width: 100%;
 	position: fixed;
 	top: $header-height;
-	height: calc(100vh - #{$header-height + $footer-height});
+	height: calc(100vh - #{$header-height});
 }

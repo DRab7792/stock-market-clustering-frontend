@@ -1,24 +1,28 @@
 var React = require('react'),
 	ReactBackbone = require('react.backbone'),
 	Header = require('./header.jsx'),
-	Footer = require('./footer.jsx');
+	Footer = require('./footer.jsx'),
+	Home = require('./home.jsx');
 
 var Main = React.createBackboneClass({
 	getInitialState: function() {
 	    return {
-	          
+
 	    };
 	},
 	render: function(){
+		var home = (this.props.curRoute != "home") ? null : 
+			<Home />;
+
 		return (<div>
-			<Header 
-				router={this.props.app.router} 
-				wpApi={this.props.app.wpApi}
+			<Header
+				page={this.props.curRoute}
+				actionHandler={this.props.app.actionHandler.bind(this.props.app)}
 			/>
 			<div className="p-wrapper">
-
+				{home}
+				<Footer/>
 			</div>
-			<Footer/>
 		</div>);
 	}
 });

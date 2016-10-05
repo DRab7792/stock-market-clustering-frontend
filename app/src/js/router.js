@@ -3,14 +3,14 @@ var Backbone = require('backbone'),
 
 var Router = BackboneRouteControl.extend({
 	routes: {
-		'': 					'pages#home',
-		'proposal': 			'pages#proposal',
-		'paper': 				'paper#overview',
-		'paper/:section': 		'paper#section',
-		'paper/:section/:sub': 	'paper#subsection',
-		'code': 				'pages#code',
-		'sources': 				'pages#sources',
-		'stack': 				'pages#stack'
+		'': 					'pages#showHome',
+		'proposal': 			'pages#showProposal',
+		'paper': 				'pages#showOverview',
+		'paper/:section': 		'pages#showSection',
+		'paper/:section/:sub': 	'pages#showSubsection',
+		'code': 				'pages#showCode',
+		'sources': 				'pages#showSources',
+		'stack': 				'pages#showStack'
 	},
 	getRoute: function(){
 		// console.log(Backbone.history);
