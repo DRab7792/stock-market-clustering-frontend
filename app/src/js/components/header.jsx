@@ -1,6 +1,8 @@
 var React = require('react'),
 	_ = require('underscore'),
 	config = require('../config'),
+	async = require('async'),
+	SectionList = require('./sectionList.jsx'),
 	ReactBackbone = require('react.backbone');
 
 var Header = React.createBackboneClass({
@@ -8,7 +10,9 @@ var Header = React.createBackboneClass({
 	    return {
 			selected: '',
 			pages: {},
-	    	nav: []
+	    	nav: [],
+	    	papers: {},
+	    	activeDropdown: null,
 	    };
 	},
 	getPages: function(){
@@ -35,6 +39,55 @@ var Header = React.createBackboneClass({
 			});
 		});
 	},
+	getPapers: function(){
+		var self = this,
+			paper = null,
+			proposal = null;
+
+		async.series([
+			function(done){
+				self.props.actionHandler({
+			    	controller: "pages",
+			    	method: "paper",
+			    	isVar: true,
+			    }, {}, function(err, res){
+					if (err){
+						return done(err);
+					}
+
+					paper = res;
+
+					return done();
+				});
+			},
+			function(done){
+				self.props.actionHandler({
+			    	controller: "pages",
+			    	method: "proposal",
+			    	isVar: true,
+			    }, {}, function(err, res){
+					if (err){
+						return done(err);
+					}
+
+					proposal = res;
+
+					return done();
+				});
+			}
+		], function(err){
+			if (err){
+				return console.log("Error getting papers", err);
+			}
+
+			self.setState({
+				papers: {
+					paper: paper,
+					proposal: proposal
+				}
+			});
+		});
+	},
 	getOptions: function(){
 		var self = this;
 
@@ -57,6 +110,7 @@ var Header = React.createBackboneClass({
 			self = this;
 
 		self.getOptions();
+		self.getPapers();
 	    self.getPages();
 		self.setState({
 			selected: curRoute
@@ -68,9 +122,33 @@ var Header = React.createBackboneClass({
 
 		this.props.router.navigate(route, {trigger: true});
 	},
+	openDropdown: function(e){
+		var el = $(e.currentTarget);
+		var dropdown = el.data("slug");
+
+		this.setState({
+			activeDropdown: dropdown
+		});
+	},
+	closeDropdown: function(e){
+		var el = $(e.currentTarget);
+		var dropdown = el.data("slug");
+
+		this.setState({
+			activeDropdown: dropdown
+		});
+	},
+	closeDropdowns: function(){
+		this.setState({
+			activeDropdown: null
+		});
+	},
 	render: function(){
 		var self = this;
-		if (!Object.keys(this.state.pages).length) return null;
+		if (
+			!Object.keys(this.state.pages).length ||
+			!self.state.papers.paper
+		) return null;
 
 		var links = _.map(this.state.nav, function(cur){
 			var pageId = 0;
@@ -88,20 +166,41 @@ var Header = React.createBackboneClass({
 
 			var page = self.state.pages[pageId];
 
-			return <li className="c-header__link" key={page.slug}>
+			var dropdown = null;
+
+			if (page.slug === "paper"){
+
+				var visibleClass = (self.state.activeDropdown === "paper") ? "c-header__dropdown__visible" : "";
+
+				dropdown = <SectionList
+					extraClasses={"c-header__dropdown "+visibleClass}
+					sections={self.state.papers.paper.get("sections")}
+				/>;
+			}else if (page.slug === "proposal"){
+
+				var visibleClass = (self.state.activeDropdown === "proposal") ? "c-header__dropdown__visible" : "";
+
+				dropdown = <SectionList
+					extraClasses={"c-header__dropdown "+visibleClass}
+					sections={self.state.papers.paper.get("sections")}
+				/>;
+			}
+
+			return <li className="c-header__link" data-slug={page.slug} onMouseOut={self.closeDropdown} onMouseDown={self.openDropdown} key={page.slug}>
 				<span onClick={self.handleNavClick} data-route={page.slug}>{page.title}</span>
+				{dropdown}
 			</li>;
 		});
 
 		var assetsUrl = config.app.assetsUrl;
 
-
+		//TODO: FIX DROPDOWN HOVER BUG
 		return (<header className="c-header">
 			<a href="" className="c-header__logo">
 				<img className="c-header__logo-icon" src={assetsUrl+"logo-no-text.svg"} />
 				<img className="c-header__logo-text" src={assetsUrl+"logo-text.svg"} />
 			</a>
-			<nav className="c-header__nav l-grid8">
+			<nav className="c-header__nav l-grid8" >
 				<ul className="c-header__navLinks">
 					{links}
 				</ul>

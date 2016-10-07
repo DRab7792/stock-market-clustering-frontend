@@ -17,6 +17,8 @@ var Bibtex = Backbone.Model.extend({
     	var self = this,
     		props = {};
 
+        
+
     	return self;
     }
 });

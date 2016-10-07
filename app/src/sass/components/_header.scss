@@ -1,6 +1,9 @@
 $header-padding: 20px;
 $header-logo-height: ($header-height - ($header-padding * 2));
 $nav-size: 16px;
+$dropdown-width: 140px;
+$dropdown-font-size: 12px;
+$triangle-size: 10px;
 
 .c-header{
 	background-color: $color-primary;
@@ -43,6 +46,8 @@ $nav-size: 16px;
 	&__link{
 		font-family: $headers-font;
 		display: inline-block;
+		position: relative;
+		overflow: visible;
 		padding-left: 2%;
 		color: $action-color;
 		font-size: $nav-size;
@@ -50,7 +55,12 @@ $nav-size: 16px;
 		padding-top: (($header-logo-height - $nav-size)/2);
 		padding-bottom: (($header-logo-height - $nav-size)/2);
 
-		&:hover{
+		&:hover .c-sections{
+			opacity: 1;
+			visibility: visible;
+		}
+
+		& span:hover{
 			opacity: .7;
 			cursor: pointer;
 		}
@@ -58,5 +68,39 @@ $nav-size: 16px;
 		&:last-of-type{
 			padding-right: 0px;
 		}
+	}
+
+	&__dropdown{
+		width: $dropdown-width;
+		margin-left: -($dropdown-width/2);
+		margin-top: $header-padding;
+		background-color: $color-secondary;
+		color: $color-background;
+		font-size: $dropdown-font-size;
+		font-family: $body-font;
+		box-shadow: $shadow;
+		opacity: 0;
+		visibility: hidden;
+		z-index: 5;
+		transition: visibility 0s linear, opacity $base-timing $base-duration;
+
+		&__visible{
+			opacity: 1;
+			visibility: visible;
+		}
+
+		&:hover{
+			cursor: pointer;
+		}
+
+		&::before{
+			top: -$triangle-size;
+			position: absolute;
+			margin-left: -($triangle-size);
+			left: 50%;
+			@include triangle(top, $color-secondary, $triangle-size);
+		}
+
+		
 	}
 }

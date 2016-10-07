@@ -20,6 +20,16 @@ String.prototype.replaceAll = function(str1, str2, ignore)
     return this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g,"\\$&"),(ignore?"gi":"g")),(typeof(str2)=="string")?str2.replace(/\$/g,"$$$$"):str2);
 } 
 
+window.deepCopy = function(obj){
+	return $.extend(true, {}, obj);
+}
+
+window.clearData = function(obj){
+	for (prop in obj){
+		obj[prop] = undefined;
+	}
+}
+
 var Application = function(){
 	// console.log("hey");
 	this.initialize();

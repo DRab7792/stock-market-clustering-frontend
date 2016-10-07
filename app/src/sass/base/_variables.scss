@@ -37,6 +37,9 @@ $action-color: $color-secondary;
 $base-border-color: $color-light-gray;
 $base-border: 1px solid $base-border-color;
 
+// Shadows
+$shadow: 3px 3px 5px 2px rgba(0,0,0,0.5);
+
 // Background Colors
 $base-background-color: #fff;
 $secondary-background-color: tint($base-border-color, 75%);

@@ -7,7 +7,7 @@ var Latex = Backbone.Model.extend({
 	defaults: {
 		title: '',
 		authors: [],
-		sections: {},
+		sections: [],
         date: null,
         abstract: "",
 	},
@@ -40,7 +40,9 @@ var Latex = Backbone.Model.extend({
             authTitleRegex = /\\affaddr\{(.*)\}/i,
             dateRegex = /\\date\{(.*)\}/i,
             startAbstractRegex = /\\begin\{abstract\}/i,
-            endAbstractRegex = /\\end\{abstract\}/i;
+            endAbstractRegex = /\\end\{abstract\}/i,
+            sectionRegex = /\\section\{(.*)\}/i,
+            subsectionRegex = /\\subsection\{(.*)\}/i;
 
         if (conditions.author) line = line.replace("\\\\", "");
 
@@ -59,9 +61,9 @@ var Latex = Backbone.Model.extend({
             data.title = res[1];
         }else if (conditions.author && line == "}"){
             var authors = self.get("authors");
-            authors.push(data);
+            authors.push(deepCopy(data));
             self.set("authors", authors);
-            data = {};
+            clearData(data);
             conditions.author = false;
         }else if (dateRegex.test(line)){
             var res = dateRegex.exec(line);
@@ -74,8 +76,38 @@ var Latex = Backbone.Model.extend({
             var abstract = self.get("abstract");
             abstract += line + "\n";
             self.set("abstract", abstract);
+        }else if (sectionRegex.test(line)){
+            //If there is an existing section, save it and reset
+            if (conditions.section){
+                var sections = self.get("sections");
+                sections.push(deepCopy(data));
+                self.set("sections", sections);
+                clearData(data);
+            }
+            //Save the title
+            var res = sectionRegex.exec(line);
+            data["title"] = res[1];
+            data["slug"] = self.getSlug(res[1]);
+            data["content"] = "";
+            data["subsections"] = [];
+            conditions.section = true;
+            conditions.subsection = false;
+        }else if (conditions.section){
+            if (!conditions.subsection && !subsectionRegex.test(line)){
+                data["content"] += line + "\n";
+            }else if (subsectionRegex.test(line)){
+                //Save the title
+                var res = subsectionRegex.exec(line);
+                data["subsections"].push({
+                    title: res[1],
+                    slug: self.getSlug(res[1]),
+                    content: ""
+                });
+                conditions.subsection = true;
+            }else if (conditions.subsection){
+                data["subsections"][(data["subsections"].length - 1)].content += line + "\n";
+            }
         }
-        //TODO: sections and subsections
     },
 
     parse: function(data){
@@ -95,8 +127,6 @@ var Latex = Backbone.Model.extend({
                 lines.push(cur);
             }
         });
-
-        console.log(lines);
 
         //Now iterate through and parse lines into info
         var conditions = {
