@@ -1,7 +1,7 @@
 var Backbone = require('backbone');
 
 var Page = Backbone.Model.extend({
-	attributes:{
+	defaults:{
 		title: '',
 		slug: '',
 		wpid: null,

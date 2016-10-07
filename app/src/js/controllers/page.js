@@ -1,20 +1,47 @@
-var PageCollection = require('../collections/pages');
+var PageCollection = require('../collections/pages'),
+	request = require('request'),
+	async = require('async'),
+	Latex = require('../models/latex'),
+	Bibtex = require('../models/bibtex');
 
 
 var PageController = function(options){
 	this.app = options.app;	
 	this.pages = [];
 	this.wpOptions = null;
+	this.paper = null;
+	this.proposal = null;
+	this.bib = null;
 };
 
 PageController.prototype.initialLoad = function(callback){
 	var self = this,
 		callbackIn = (callback) ? callback : function(){};
 
-	self.loadPages(function(){
-		self.loadOptions(function(){
-			return callbackIn();
-		});
+	//Make calls for pages, wp options and tex files
+	async.series([
+		function(done){
+			self.loadPages(function(err){
+				return done(err);
+			});
+		},
+		function(done){
+			self.loadOptions(function(err){
+				return done(err);
+			});
+		},
+		function(done){
+			self.loadTex(function(err){
+				return done(err);
+			});
+		}
+	], function(err){
+		if (err){
+			console.log("Error loading wordpress pages", err);
+			return callbackIn(err);
+		}
+
+		return callbackIn();
 	});
 };
 
@@ -46,6 +73,58 @@ PageController.prototype.loadPages = function(callback){
 		return callbackIn();
 	});
 };
+
+PageController.prototype.loadTex = function(callback){
+	var self = this,
+		callbackIn = (callback) ? callback : function(){};
+
+	async.series([
+		function(done){
+			if (
+				!self.wpOptions ||
+				!self.wpOptions.theme || 
+				!self.wpOptions.theme.paper
+			){
+				return done("No paper url");
+			}
+
+			self.paper = new Latex({
+				url: self.wpOptions.theme.paper
+			});
+
+			self.paper.fetch({
+				dataType: 'text',
+				success: function(model, response, options){
+					return done();
+				},
+				error: function(model, response, options){
+					return done("Error loading paper");
+				}
+			});
+		},
+		function(done){
+			if (
+				!self.wpOptions ||
+				!self.wpOptions.theme || 
+				!self.wpOptions.theme.proposal
+			){
+				return done();
+			}
+
+			self.paper = new Latex({
+				url: self.wpOptions.theme.proposal,
+				success: function(){
+					return done();
+				},
+				error: function(){
+					return done("Error loading proposal");
+				}
+			});
+		}
+	], function(err){
+		return callbackIn(err);
+	});
+}
 
 PageController.prototype.showHome = function(){
 	console.log("home");

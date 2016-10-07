@@ -8,6 +8,18 @@ var Backbone = require('backbone'),
 
 Backbone.$ = $;
 
+//Title case function
+String.prototype.toTitleCase = function()
+{
+    return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}
+
+//Replace All
+String.prototype.replaceAll = function(str1, str2, ignore) 
+{
+    return this.replace(new RegExp(str1.replace(/([\/\,\!\\\^\$\{\}\[\]\(\)\.\*\+\?\|\<\>\-\&])/g,"\\$&"),(ignore?"gi":"g")),(typeof(str2)=="string")?str2.replace(/\$/g,"$$$$"):str2);
+} 
+
 var Application = function(){
 	// console.log("hey");
 	this.initialize();

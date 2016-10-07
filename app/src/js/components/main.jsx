@@ -17,6 +17,7 @@ var Main = React.createBackboneClass({
 		return (<div>
 			<Header
 				page={this.props.curRoute}
+				router={this.props.app.router}
 				actionHandler={this.props.app.actionHandler.bind(this.props.app)}
 			/>
 			<div className="p-wrapper">

@@ -13,6 +13,8 @@ app.on('ready', function(){
 		'height': 768,
 		'minWidth': 1024,
 		'minHeight': 530,
+		'titleBarStyle': 'hidden',
+		'frame': false,
 		'icon': 'file://'+__dirname+'../..icons/gulp-electron.ico'
 	});
 

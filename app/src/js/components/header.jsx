@@ -27,9 +27,7 @@ var Header = React.createBackboneClass({
 
 			//Transform Backbone collection data
 			_.each(res.models, function(cur){
-				if (cur.attributes && cur.attributes.wpid){
-					adjPages[cur.attributes.wpid] = cur.attributes;
-				}
+				adjPages[cur.get("wpid")] = cur.attributes;
 			});
 
 			self.setState({

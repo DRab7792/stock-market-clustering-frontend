@@ -1,4 +1,4 @@
-$header-padding: 12px;
+$header-padding: 20px;
 $header-logo-height: ($header-height - ($header-padding * 2));
 $nav-size: 16px;
 
@@ -7,8 +7,9 @@ $nav-size: 16px;
 	display: block;
 	position: fixed;
 	top: 0px;
-	padding: 12px;
+	padding: $header-padding;
 	width: 100%;
+	-webkit-app-region: drag;
 
 	&__logo{
 
