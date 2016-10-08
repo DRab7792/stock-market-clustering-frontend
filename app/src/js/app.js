@@ -30,6 +30,20 @@ window.clearData = function(obj){
 	}
 }
 
+window.isScrolledIntoView = function(elem){
+    var $elem = $(elem);
+    var $window = $(window);
+
+    var docViewTop = $window.scrollTop();
+    var docViewBottom = docViewTop + $window.height();
+
+    var elemTop = $elem.offset().top;
+    var elemBottom = elemTop + $elem.height();
+
+    return ((elemBottom <= docViewBottom) && (elemTop >= docViewTop));
+}
+
+
 var Application = function(){
 	// console.log("hey");
 	this.initialize();

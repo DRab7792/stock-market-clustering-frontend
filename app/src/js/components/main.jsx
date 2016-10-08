@@ -12,7 +12,9 @@ var Main = React.createBackboneClass({
 	},
 	render: function(){
 		var home = (this.props.curRoute != "home") ? null : 
-			<Home />;
+		<Home 
+			actionHandler={this.props.app.actionHandler.bind(this.props.app)}
+		/>;
 
 		return (<div>
 			<Header

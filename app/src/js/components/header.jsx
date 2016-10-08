@@ -112,6 +112,9 @@ var Header = React.createBackboneClass({
 		self.getOptions();
 		self.getPapers();
 	    self.getPages();
+
+	    // document.addEventListener("")
+
 		self.setState({
 			selected: curRoute
 		});
@@ -151,6 +154,7 @@ var Header = React.createBackboneClass({
 		) return null;
 
 		var links = _.map(this.state.nav, function(cur){
+			//Get the data
 			var pageId = 0;
 
 			if (!cur['object_id']){ 
@@ -166,13 +170,20 @@ var Header = React.createBackboneClass({
 
 			var page = self.state.pages[pageId];
 
-			var dropdown = null;
+			//Don't allow proposal in the header if there is no paper for it
+			if (page.slug === "proposal" && !self.state.papers.proposal){
+				return;
+			}
 
+			//Form dropdowns
+			var dropdown = null;
 			if (page.slug === "paper"){
 
 				var visibleClass = (self.state.activeDropdown === "paper") ? "c-header__dropdown__visible" : "";
 
 				dropdown = <SectionList
+					source={page.slug}
+					router={self.props.router}
 					extraClasses={"c-header__dropdown "+visibleClass}
 					sections={self.state.papers.paper.get("sections")}
 				/>;
@@ -181,13 +192,16 @@ var Header = React.createBackboneClass({
 				var visibleClass = (self.state.activeDropdown === "proposal") ? "c-header__dropdown__visible" : "";
 
 				dropdown = <SectionList
+					source={page.slug}
+					router={self.props.router}
 					extraClasses={"c-header__dropdown "+visibleClass}
-					sections={self.state.papers.paper.get("sections")}
+					sections={self.state.papers.proposal.get("sections")}
 				/>;
 			}
 
-			return <li className="c-header__link" data-slug={page.slug} onMouseOut={self.closeDropdown} onMouseDown={self.openDropdown} key={page.slug}>
-				<span onClick={self.handleNavClick} data-route={page.slug}>{page.title}</span>
+			//Render link
+			return <li className="c-header__link" data-slug={page.slug} key={page.slug}>
+				<span className="c-header__link__parent" onClick={self.handleNavClick} data-route={page.slug}>{page.title}</span>
 				{dropdown}
 			</li>;
 		});

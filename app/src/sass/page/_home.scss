@@ -1,0 +1,40 @@
+$hero-height: 400px;
+$title-width: 650px;
+$color-overlay: $color-primary;
+// $color-overlay: #333;
+
+.p-home-hero{
+	width: 100%;
+	height: $hero-height;
+	position: relative;
+	overflow: hidden;
+
+	&__video{
+		width: 100%;
+	}
+
+	&__overlay{
+		position: absolute;
+		top: 0px;
+		left: 0px;
+		width: 100%;
+		height: 100%;
+
+		&__video{
+			background: linear-gradient(0deg, rgba($color-overlay, 0.9) 0%, rgba($color-overlay, 0.4) 50%, rgba($color-overlay, 0.9) 100%);
+		}
+	}
+
+	&__title{
+		color: $color-background;
+		text-align: center;
+		top: 35%;
+	    width: $title-width;
+	    left: 50%;
+	    margin-left: -($title-width/2);
+	    position: absolute;
+		letter-spacing: 2px;
+		text-transform: uppercase;
+		font-size: 46px;
+	}
+}

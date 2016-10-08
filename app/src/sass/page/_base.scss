@@ -5,3 +5,5 @@
 	top: $header-height;
 	height: calc(100vh - #{$header-height});
 }
+
+@import "home";
