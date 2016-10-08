@@ -3,3 +3,4 @@ app/node_modules
 cache
 release
 app/build
+app/src/assets
