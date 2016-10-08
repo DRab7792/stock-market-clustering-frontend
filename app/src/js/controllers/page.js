@@ -88,9 +88,9 @@ PageController.prototype.loadTex = function(callback){
 				return done("No paper url");
 			}
 
-			self.paper = new Latex({
+			self.paper = deepCopy(new Latex({
 				url: self.wpOptions.theme.paper
-			});
+			}));
 
 			self.paper.fetch({
 				dataType: 'text',
@@ -111,8 +111,12 @@ PageController.prototype.loadTex = function(callback){
 				return done();
 			}
 
-			self.paper = new Latex({
-				url: self.wpOptions.theme.proposal,
+			self.proposal = deepCopy(new Latex({
+				url: self.wpOptions.theme.proposal
+			}));
+
+			self.proposal.fetch({
+				dataType: 'text',
 				success: function(){
 					return done();
 				},

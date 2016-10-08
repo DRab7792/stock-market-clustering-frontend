@@ -5,6 +5,7 @@ var React = require('react'),
 
 var SectionList = React.createBackboneClass({
 	getInitialState: function() {
+		
 	    return {
 			selected: null,
 	    };

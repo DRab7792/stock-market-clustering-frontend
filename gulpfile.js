@@ -214,7 +214,7 @@ gulp.task('package', function() {
 	                "version-string": packageJson.version,
 	                "file-version": packageJson.version,
 	                "product-version": packageJson.version,
-	                icon: 'icons/gulp-electron.ico'
+	                icon: 'icons/ico-logo.ico'
 	            }
 	        }
 	    }))
@@ -231,8 +231,8 @@ gulp.task('prod', function(){
 	gulp.start("icons");
 	gulp.start("compile");
 
-	gulp.src('release', {read: false})
-        .pipe(clean());
+	// gulp.src('release', {read: false})
+ //        .pipe(clean());
 
 	setTimeout(function(){
 		gulp.start("package");

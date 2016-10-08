@@ -114,6 +114,8 @@ var Latex = Backbone.Model.extend({
     	var self = this,
     		props = {};
 
+        console.log(JSON.stringify(self.get("authors")));
+
         //Nothing returned
         if (!data.length) return self;
 
@@ -137,10 +139,11 @@ var Latex = Backbone.Model.extend({
         };
         var data = {};
         _.each(lines, function(cur){
+            // console.log("parse", cur);
             self.parseLine(cur, conditions, data);
         });
 
-        console.log(self);
+        
     	return self;
     }
 });

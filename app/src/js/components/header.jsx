@@ -208,12 +208,11 @@ var Header = React.createBackboneClass({
 
 		var assetsUrl = config.app.assetsUrl;
 
-		//TODO: FIX DROPDOWN HOVER BUG
 		return (<header className="c-header">
-			<a href="" className="c-header__logo">
+			<div onClick={self.handleNavClick} data-route="" className="c-header__logo">
 				<img className="c-header__logo-icon" src={assetsUrl+"logo-no-text.svg"} />
 				<img className="c-header__logo-text" src={assetsUrl+"logo-text.svg"} />
-			</a>
+			</div>
 			<nav className="c-header__nav l-grid8" >
 				<ul className="c-header__navLinks">
 					{links}

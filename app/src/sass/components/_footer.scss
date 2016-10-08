@@ -5,7 +5,7 @@ $footer-logo-height: ($footer-height - ($footer-padding * 2));
 .c-footer{
 	height: $footer-height;
 	display: block;
-	position: absolute;
+	position: relative;
 	bottom: 0px;
 	width: 100%;
 	padding: $footer-padding $header-padding;

@@ -24,6 +24,7 @@ $triangle-size: 10px;
 		}
 
 		&:hover img{
+			cursor: pointer;
 			opacity: .8;
 		}
 
@@ -31,6 +32,7 @@ $triangle-size: 10px;
 			float: left;
 			height: $header-logo-height;
 		}
+
 
 		&-text{
 			float: left;

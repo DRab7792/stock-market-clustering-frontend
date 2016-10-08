@@ -14,6 +14,7 @@ app.on('ready', function(){
 		'minWidth': 1024,
 		'minHeight': 530,
 		'titleBarStyle': 'hidden',
+		'node-integration': false,
 		'frame': false,
 		'icon': 'file://'+__dirname+'../..icons/gulp-electron.ico'
 	});

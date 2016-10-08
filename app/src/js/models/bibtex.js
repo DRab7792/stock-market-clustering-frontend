@@ -23,4 +23,5 @@ var Bibtex = Backbone.Model.extend({
     }
 });
 
+
 module.exports = Bibtex;

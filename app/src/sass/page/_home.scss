@@ -1,6 +1,9 @@
 $hero-height: 400px;
 $title-width: 650px;
 $color-overlay: $color-primary;
+$section-padding: 50px;
+$line-height: 24px;
+$font-size: 17px;
 // $color-overlay: #333;
 
 .p-home-hero{
@@ -36,5 +39,63 @@ $color-overlay: $color-primary;
 		letter-spacing: 2px;
 		text-transform: uppercase;
 		font-size: 46px;
+	}
+}
+
+.p-home-icons{
+	@include outer-container;
+	padding: $section-padding 0px;
+
+	&__section{
+		@include span-columns(4);
+		text-align: center;
+	}
+
+	&__icon{
+		color: $color-background;
+		font-size: 32px;
+		padding-top: 25px;
+		background-color: $color-secondary;
+		border-radius: 50px;
+		width: 80px;
+		height: 80px;
+	}
+
+	&__description{
+		display: block;
+		line-height: $line-height;
+		margin-top: 20px;
+		padding: 0px $header-padding;
+		font-family: $body-font;
+		font-size: $font-size;
+		color: $color-darkest-gray;
+	}
+}
+
+.p-home-abstract{
+	background-color: rgba($color-tertiary, 1);
+	padding: $section-padding 0px;
+	color: $color-background;
+
+	&__container{
+		@include outer-container;
+	}
+
+	&__title{
+		font-family: $headers-font;
+		font-size: 32px;
+		text-align: center;
+		margin-bottom: 20px;
+		text-transform: uppercase;
+		letter-spacing: 2px;
+	}
+
+	&__body{
+		padding: 0px $header-padding;
+		text-indent: 25px;
+		font-family: $body-font;
+		letter-spacing: 1px;
+		font-size: $font-size;
+		line-height: $line-height;
 	}
 }
