@@ -5,7 +5,6 @@ var Backbone = require('backbone'),
 	config = require('./config'),
 	WpController = require('./controllers/wpapi');
 
-
 Backbone.$ = $;
 
 //Title case function
@@ -30,15 +29,18 @@ window.clearData = function(obj){
 	}
 }
 
-window.isScrolledIntoView = function(elem){
-    var $elem = $(elem);
-    var $window = $(window);
+window.getSlug = function(sectionTitle){
+    return sectionTitle.toLowerCase().replaceAll(" ", "-");
+};
+
+window.isScrolledIntoView = function(elem, container){
+    var $window = (!container) ? $(window) : container;
 
     var docViewTop = $window.scrollTop();
     var docViewBottom = docViewTop + $window.height();
 
-    var elemTop = $elem.offset().top;
-    var elemBottom = elemTop + $elem.height();
+    var elemTop = elem.offset().top;
+    var elemBottom = elemTop + elem.height();
 
     return ((elemBottom <= docViewBottom) && (elemTop >= docViewTop));
 }
@@ -76,6 +78,7 @@ Application.prototype.initialize = function(){
 Application.prototype.startApp = function(){
 	var self = this;
 	Backbone.history.start({ pushState: true });
+
 
 	this.controllers.pages.initialLoad(function(){
 		self.controllers.pages.showHome();

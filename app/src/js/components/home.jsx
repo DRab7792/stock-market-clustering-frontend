@@ -96,7 +96,7 @@ var Home = React.createBackboneClass({
 
 		var assetsUrl = config.app.assetsUrl;
 
-		console.log(console.dir());
+		console.log(assetsUrl);
 
 		var bg = null,
 			mod = "";

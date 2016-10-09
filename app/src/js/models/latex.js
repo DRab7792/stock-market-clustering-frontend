@@ -28,10 +28,6 @@ var Latex = Backbone.Model.extend({
         }
     },
 
-    getSlug: function(sectionTitle){
-        return sectionTitle.toLowerCase().replaceAll(" ", "-");
-    },
-
     parseLine: function(line, conditions, data){
         var self = this;
         var titleRegex = /\\title\{(.*)\}/i,
@@ -87,7 +83,7 @@ var Latex = Backbone.Model.extend({
             //Save the title
             var res = sectionRegex.exec(line);
             data["title"] = res[1];
-            data["slug"] = self.getSlug(res[1]);
+            data["slug"] = getSlug(res[1]);
             data["content"] = "";
             data["subsections"] = [];
             conditions.section = true;
@@ -100,7 +96,7 @@ var Latex = Backbone.Model.extend({
                 var res = subsectionRegex.exec(line);
                 data["subsections"].push({
                     title: res[1],
-                    slug: self.getSlug(res[1]),
+                    slug: getSlug(res[1]),
                     content: ""
                 });
                 conditions.subsection = true;

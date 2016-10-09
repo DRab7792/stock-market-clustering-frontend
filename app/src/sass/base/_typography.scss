@@ -20,6 +20,15 @@ h6 {
     margin: 0 0 $small-spacing;
 }
 
+h2{
+    font-family: $headers-font;
+    font-size: 32px;
+    text-align: center;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
 p {
     margin: 0 0 $small-spacing;
 }

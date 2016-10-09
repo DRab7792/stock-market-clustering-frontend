@@ -1,0 +1,12 @@
+.__react_component_tooltip.type-info{
+	font-family: $body-font;
+	color: $color-background;
+	text-transform: uppercase;
+	font-size: 12px;
+	letter-spacing: 1px;
+	background-color: $color-tertiary !important;
+}
+
+.__react_component_tooltip.type-info.place-right:after{
+	border-right-color: $color-tertiary !important;
+}

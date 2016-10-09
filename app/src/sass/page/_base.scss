@@ -4,7 +4,12 @@
 	position: fixed;
 	top: $header-height;
 	overflow: auto;
-	height: calc(100vh - #{$header-height});
+	height: calc(100vh - (#{$header-height}));
+}
+
+.p-content{
+	min-height: calc(100vh - (#{$header-height} + #{$footer-height}));
 }
 
 @import "home";
+@import "stack";

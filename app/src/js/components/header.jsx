@@ -199,8 +199,10 @@ var Header = React.createBackboneClass({
 				/>;
 			}
 
+			var extraClass = (self.props.page === page.slug) ? "c-header__link__selected" : "";
+
 			//Render link
-			return <li className="c-header__link" data-slug={page.slug} key={page.slug}>
+			return <li className={"c-header__link "+extraClass} data-slug={page.slug} key={page.slug}>
 				<span className="c-header__link__parent" onClick={self.handleNavClick} data-route={page.slug}>{page.title}</span>
 				{dropdown}
 			</li>;

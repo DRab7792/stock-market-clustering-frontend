@@ -2,7 +2,8 @@ var React = require('react'),
 	ReactBackbone = require('react.backbone'),
 	Header = require('./header.jsx'),
 	Footer = require('./footer.jsx'),
-	Home = require('./home.jsx');
+	Home = require('./home.jsx'),
+	Stack = require('./stack.jsx');
 
 var Main = React.createBackboneClass({
 	getInitialState: function() {
@@ -16,6 +17,12 @@ var Main = React.createBackboneClass({
 			actionHandler={this.props.app.actionHandler.bind(this.props.app)}
 		/>;
 
+		var stack = (this.props.curRoute != "stack") ? null : 
+		<Stack 
+			actionHandler={this.props.app.actionHandler.bind(this.props.app)}
+		/>;
+		
+
 		return (<div>
 			<Header
 				page={this.props.curRoute}
@@ -23,7 +30,10 @@ var Main = React.createBackboneClass({
 				actionHandler={this.props.app.actionHandler.bind(this.props.app)}
 			/>
 			<div className="p-wrapper">
-				{home}
+				<div className="p-content">
+					{home}
+					{stack}
+				</div>
 				<Footer/>
 			</div>
 		</div>);

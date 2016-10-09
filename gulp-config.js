@@ -6,14 +6,4 @@ config.app = {
 	wpApiUrl: "http://bigdata.dan-rabinowitz.com/wp-json",
 }
 
-
-if (location && location.href){
-	var url = location.href;
-	var cut = url.lastIndexOf("/");
-	url = url.substring(0, cut) + "/";
-	config.app.assetsUrl = url + "assets/";
-}
-
-console.log(config.app);
-
 module.exports = config;

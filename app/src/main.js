@@ -19,8 +19,12 @@ app.on('ready', function(){
 		'icon': 'file://'+__dirname+'../..icons/gulp-electron.ico'
 	});
 
-	mainWindow.loadURL('file://'+__dirname+'/index.html');
-	// console.log(mainWindow);
+	var baseURL = 'file://'+__dirname;
+
+	mainWindow.loadURL(baseURL+'/index.html');
+
+	
+
 	if (process.env.NODE_ENV == 'dev') mainWindow.openDevTools();
 
 	mainWindow.on('closed', function(){

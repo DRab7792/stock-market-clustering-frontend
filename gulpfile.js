@@ -10,7 +10,7 @@ var gulp = require('gulp'),
 	_ = require('underscore'),
 	jsonSass = require('gulp-json-sass'),
 	clean = require('gulp-clean'),
-	config = require('./app/src/js/config.js'),
+	config = require('./gulp-config.js'),
 	source = require('vinyl-source-stream'),
 	reactify = require('reactify'),
 	run = require('gulp-run'),
@@ -231,8 +231,8 @@ gulp.task('prod', function(){
 	gulp.start("icons");
 	gulp.start("compile");
 
-	// gulp.src('release', {read: false})
- //        .pipe(clean());
+	gulp.src('release', {read: false})
+        .pipe(clean());
 
 	setTimeout(function(){
 		gulp.start("package");

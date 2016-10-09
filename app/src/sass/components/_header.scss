@@ -60,6 +60,10 @@ $triangle-size: 10px;
 		padding-top: (($header-logo-height - $nav-size)/2);
 		padding-bottom: (($header-logo-height - $nav-size)/2 + $header-padding);
 
+		&__selected{
+			color: $color-background;
+		}
+
 		&:hover .c-sections{
 			opacity: 1;
 			visibility: visible;
