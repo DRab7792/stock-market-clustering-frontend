@@ -2,6 +2,7 @@ var React = require('react'),
 	config = require('../config'),
 	_  = require('underscore'),
 	async = require('async'),
+	// Source = require('./source.jsx'),
 	ReactDOM = require('react-dom'),
 	ReactBackbone = require('react.backbone');
 
@@ -11,7 +12,7 @@ var Bibliography = React.createBackboneClass({
 	    	bibtex: null
 	    };
 	},
-	getMeta: function(callback){
+	getBibtex: function(callback){
 		var self = this;
 		var callbackIn = (callback) ? callback : function(){};
 
@@ -40,29 +41,25 @@ var Bibliography = React.createBackboneClass({
 		if (!self.state.bibtex) return null;
 
 		// console.log(self.state.meta.stack);
-		var sources = _.map(self.state.bibtex, function(cur){
-			var slug = getSlug(cur.title);
-			return <div className="p-stack__resource" key={slug} ref={slug}>
-				<div className="p-stack__resource-container">
-					<img className="p-stack__resource-image" src={assetsUrl+cur.image} />
-					{/*<h3 className="p-stack__resource-title">{cur.title}</h3>*/}
-					<p className="p-stack__resource-description">{cur.description}</p>
-				</div>
-			</div>;
+		var sources = _.map(self.state.bibtex.get("references"), function(cur){
+			return <li key={cur.citekey}>
+				{/*<Source data={cur.fields} authors={cur.fields.authors} />*/}
+			</li>;
 		});
 
-		return (<ul className="p-sources__list">
+		return (<ol className="p-sources__list">
 			{sources}
-		</ul>);
+		</ol>);
 	},
 	render: function(){
 		var self = this;
-		if (!self.state.meta) return null;
+		if (!self.state.bibtex) return null;
 
 		var sources = self.formSources();
 
-		return (<div className="p-stack">
-			<h2 className="p-stack__title">Sources</h2>
+		// console.log("Render");
+		return (<div className="p-bib">
+			<h2 className="p-bib__title">Sources</h2>
 			{sources}
 		</div>);
 	}

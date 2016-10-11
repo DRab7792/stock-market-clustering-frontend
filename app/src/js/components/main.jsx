@@ -3,6 +3,7 @@ var React = require('react'),
 	Header = require('./header.jsx'),
 	Footer = require('./footer.jsx'),
 	Home = require('./home.jsx'),
+	Bib = require('./bib.jsx'),
 	Stack = require('./stack.jsx');
 
 var Main = React.createBackboneClass({
@@ -22,6 +23,10 @@ var Main = React.createBackboneClass({
 			actionHandler={this.props.app.actionHandler.bind(this.props.app)}
 		/>;
 		
+		var bib = (this.props.curRoute != "sources") ? null : 
+		<Bib 
+			actionHandler={this.props.app.actionHandler.bind(this.props.app)}
+		/>;
 
 		return (<div>
 			<Header
@@ -33,6 +38,7 @@ var Main = React.createBackboneClass({
 				<div className="p-content">
 					{home}
 					{stack}
+					{bib}
 				</div>
 				<Footer/>
 			</div>
