@@ -5,15 +5,15 @@ var Router = BackboneRouteControl.extend({
 	routes: {
 		'': 					'pages#showHome',
 		'proposal': 			'pages#showProposal',
-		'paper': 				'pages#showOverview',
-		'paper/:section': 		'pages#showSection',
-		'paper/:section/:sub': 	'pages#showSubsection',
+		'proposal/:section': 	'pages#showProposal',
+		'paper': 				'pages#showPaper',
+		'paper/:section': 		'pages#showPaper',
 		'code': 				'pages#showCode',
 		'sources': 				'pages#showSources',
 		'stack': 				'pages#showStack'
 	},
 	getRoute: function(){
-		// console.log(Backbone.history);
+		
 		return Backbone.history.location.hash;
 	}
 });

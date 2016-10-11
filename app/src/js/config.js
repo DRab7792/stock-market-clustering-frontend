@@ -14,6 +14,4 @@ if (location && location.href){
 	config.app.assetsUrl = url + "assets/";
 }
 
-console.log(config.app);
-
 module.exports = config;

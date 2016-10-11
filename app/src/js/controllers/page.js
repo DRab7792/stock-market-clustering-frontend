@@ -106,6 +106,29 @@ PageController.prototype.loadTex = function(callback){
 			if (
 				!self.wpOptions ||
 				!self.wpOptions.theme || 
+				!self.wpOptions.theme.bibliography
+			){
+				return done("No bibliography url");
+			}
+
+			self.bib = deepCopy(new Bibtex({
+				url: self.wpOptions.theme.bibliography
+			}));
+
+			self.bib.fetch({
+				dataType: 'text',
+				success: function(model, response, options){
+					return done();
+				},
+				error: function(model, response, options){
+					return done("Error loading bibliography");
+				}
+			});
+		},
+		function(done){
+			if (
+				!self.wpOptions ||
+				!self.wpOptions.theme || 
 				!self.wpOptions.theme.proposal
 			){
 				return done();
@@ -155,7 +178,7 @@ PageController.prototype.showStack = function(){
 	this.app.mainView.render("stack");
 };
 
-PageController.prototype.showOverview = function(){
+PageController.prototype.showPaper = function(){
 	console.log("overview");
 	this.app.mainView.render("overview");
 };

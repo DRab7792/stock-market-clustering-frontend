@@ -24,6 +24,7 @@
     "async": "^1.5.2",
     "backbone": "^1.3.3",
     "backbone-route-control": "^0.1.0",
+    "bib2json": "0.0.1",
     "bootstrap-sass": "^3.3.6",
     "d3": "^4.2.6",
     "electron": "^1.4.3",
