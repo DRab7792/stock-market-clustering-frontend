@@ -1,0 +1,21 @@
+$nav-width: 50px;
+$container-height: 600px;
+$line-height: $larger-line-height;
+$font-size: $larger-font-size;
+
+.p-bib{
+	@include outer-container;
+	padding: $section-padding $header-padding;
+	font-size: $font-size;
+	line-height: $line-height;
+
+	&__list{
+		list-style-type: decimal;
+		padding-left: 30px;
+
+		.c-source{
+			display: block;
+			margin: 10px 0px;
+		}
+	}
+}

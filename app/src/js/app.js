@@ -45,6 +45,19 @@ window.isScrolledIntoView = function(elem, container){
     return ((elemBottom <= docViewBottom) && (elemTop >= docViewTop));
 }
 
+//External links
+$("body").on("click", "a", function(e){
+	var el = $(e.currentTarget);
+	el = el[0];
+	if (
+		el.attributes && 
+		el.attributes.target && 
+		el.attributes.target.value && 
+		el.attributes.target.value === "_blank"
+	){
+		// e.preventDefault();
+	}
+});
 
 var Application = function(){
 	// console.log("hey");
@@ -81,7 +94,7 @@ Application.prototype.startApp = function(){
 
 
 	this.controllers.pages.initialLoad(function(){
-		self.controllers.pages.showHome();
+		self.controllers.pages.showSources();
 	});
 };
 

@@ -1,7 +1,7 @@
 $nav-width: 50px;
 $container-height: 600px;
-$line-height: 24px;
-$font-size: 17px;
+$line-height: $larger-line-height;
+$font-size: $larger-font-size;
 
 .p-stack{
 	padding: $section-padding 0px;

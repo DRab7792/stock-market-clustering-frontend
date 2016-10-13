@@ -1,4 +1,5 @@
 var app = require('electron').app,
+	shell = require('shell'),
 	BrowserWindow = require('electron')['BrowserWindow'];
 
 var mainWindow = null;
@@ -14,7 +15,7 @@ app.on('ready', function(){
 		'minWidth': 1024,
 		'minHeight': 530,
 		'titleBarStyle': 'hidden',
-		'node-integration': false,
+		'node-integration': true,
 		'frame': false,
 		'icon': 'file://'+__dirname+'../..icons/gulp-electron.ico'
 	});
@@ -23,7 +24,12 @@ app.on('ready', function(){
 
 	mainWindow.loadURL(baseURL+'/index.html');
 
-	
+	mainWindow.webContents.on('will-navigate', function(e, url) {
+		e.preventDefault();
+		if (url.indexOf("file://") === -1){
+			shell.openExternal(url);
+		}
+	});
 
 	if (process.env.NODE_ENV == 'dev') mainWindow.openDevTools();
 

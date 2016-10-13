@@ -498,6 +498,29 @@ var Bibtex = Backbone.Model.extend({
 
     //     return html_str;
     // },
+    
+    extractAuthorListDefault: function(authors_string) {
+        var authors = authors_string.split(' and ').map(function(author) {
+            var namespl = author.split(', ');
+            if (namespl.length == 2) {
+                var lastName = author.split(', ')[0];
+                var firstName = author.split(', ')[1];
+                return firstName + ' ' + lastName;
+            } else {
+                return author;
+            }
+        });
+        if (authors.length > 1) {
+            authors = authors.slice(0, -1)
+                .reduceRight(function(previousValue, currentValue) {
+                    return currentValue + ', ' + previousValue;
+                }, 'and ' + authors.slice(-1));
+        } else {
+            authors = authors[0];
+        }
+
+        return authors;
+    },
 
     parse: function(data){
     	var self = this,
@@ -508,18 +531,28 @@ var Bibtex = Backbone.Model.extend({
 
         var bibdata = parser(data);
 
+        //Adjust data
         var adjData = _.map(bibdata.entries, function(cur){
+            //Lowercase object properties
             for (var prop in cur) {
                 cur[prop.toLowerCase()] = cur[prop];
+                delete cur[prop];
             }
+
+            //Lowercase field names
             for (var prop in cur.fields) {
-                cur[prop.toLowerCase()] = cur.fields[prop];
+                cur.fields[prop.toLowerCase()] = cur.fields[prop];
             }
+
+            //Set type in fields as well
+            cur.fields.type = cur.entrytype;
+
+            //Extract authors
+            if (cur.fields.author) cur.fields.author = self.extractAuthorListDefault(cur.fields.author);
+
             return cur;
         });
-        console.log(adjData[0]);
-
-        // console.log(self.bibtexRenderHtml(adjData[0], 'default'));
+        self.set("references", adjData);
 
     	return self;
     }

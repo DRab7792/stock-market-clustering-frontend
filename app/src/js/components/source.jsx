@@ -11,21 +11,21 @@ var Source = React.createBackboneClass({
 	getTitle: function(data){
 		var title = null;
 		if ('title' in data) {
-            title = <span className="c-source__title">{'"' + data.title + ',"'}</span>;
+            title = <span className="c-source__title">{'"' + data.title + '," '}</span>;
         }
         return title;
 	},
 	getTitleForBook: function(data){
 		var title = null;
 		if ('title' in data) {
-            title = <i className="c-source__title">{data.title + '.'}</i>;
+            title = <i className="c-source__title">{data.title + '. '}</i>;
         }
         return title;
 	},
 	getJournal: function(data){
 		var journal = null;
 		if ('journal' in data) {
-            journal = <span className="c-source__journal"><i>{'"' + data.journal + '"'}</i>, </span>;
+            journal = <span className="c-source__journal"><i>{'"' + data.journal + ',"'} </i></span>;
         }
         return journal;
 	},
@@ -166,12 +166,12 @@ var Source = React.createBackboneClass({
         return series;
 	},
 	render: function(){
-		var data = this.props.entry,
-			authors = this.props.authors,
+		var data = this.props.entry.fields,
 			self = this;
 
+
 		var start = null;
-		var author = <span className="c-source__author">{authors}</span>;
+		var author = (data.author) ? <span className="c-source__author">{data.author+". "}</span> : null;
 
         if (data.type === 'article') {
         	var title = self.getTitle(data), 
@@ -202,7 +202,8 @@ var Source = React.createBackboneClass({
         } else if (data.type === 'book') {
             var title = self.getTitleForBook(data), 
             	address = self.getAddress(data), 
-            	publisher = self.getPublisher(data, ": ", ".");
+                prefix = (!address) ? null: ": ",
+            	publisher = self.getPublisher(data, prefix, ". ");
 
             start = (<span>
             	{author}
@@ -409,7 +410,7 @@ var Source = React.createBackboneClass({
             	{note}
             </span>);
         } else {
-            start = <b style="color: red;">{"data Type Not Implemented: " + data.type}</b>;
+            start = <b style={{color: 'red'}}>{"data Type Not Implemented: " + data.type}</b>;
         }
 
         var year = null, 
@@ -418,39 +419,48 @@ var Source = React.createBackboneClass({
         	pages = null, 
         	language = null, 
         	doi = null, 
-        	url = null;
+        	url = null,
+            space = false;
 
-        if ('month' in data){
-        	month = <span>{data.month + " "}</span>;
-        }
-        if ('year' in data){
-        	year = <span>{data.year + " "}</span>;
-        }
+        
         if ('chapter' in data && (data.type === 'inbook' || data.type === 'incollection')) {
             chapter = <span>, <span className="c-source__chapter">{'ch. ' + data['chapter']}</span></span>;
+            space = true;
         }
         if ('pages' in data) {
             pages = <span>, <span className="c-source__pages">{'pp. ' + data['pages']}</span></span>;
+            space = true;
         }
         if ('language' in data) {
             language = <span className="c-source__language">{'(in ' + data['language'] + ')'}</span>;
+            space = true;
+        }
+
+        if ('month' in data){
+            month = <span>{data.month + " "}</span>;
+        }
+        if ('year' in data && space){
+            year = <span>{data.year + " "}</span>;
+        }else if ('year' in data){
+            year = <span>{data.year}</span>;
         }
 
         if ('doi' in data) {
-            doi = <span className="c-source__doi"> DOI: <a href={"http://dx.doi.org/" + data.doi}>{data.doi}</a>. </span>;
+            doi = <span className="c-source__doi"> DOI: <a target="_blank" href={"http://dx.doi.org/" + data.doi}>{data.doi}</a>. </span>;
         }
         if ('url' in data) {
-            url = <span className="c-source__link"> <a href={data.url}>{data.url}</a>. </span>;
+            url = <span className="c-source__link"> <a target="_blank" href={data.url}>{data.url}</a>. </span>;
         }
 
-        return <span className="c-source">
+
+        return <span className="c-source" data-key={this.props.entry.entrykey}>
         	{start}
         	{month}
         	{year}
         	{chapter}
         	{pages}
         	{language}
-        	{"."}
+        	{". "}
         	{doi}
         	{url}
         </span>;

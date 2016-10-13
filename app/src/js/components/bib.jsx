@@ -2,7 +2,7 @@ var React = require('react'),
 	config = require('../config'),
 	_  = require('underscore'),
 	async = require('async'),
-	// Source = require('./source.jsx'),
+	Source = require('./source.jsx'),
 	ReactDOM = require('react-dom'),
 	ReactBackbone = require('react.backbone');
 
@@ -42,12 +42,14 @@ var Bibliography = React.createBackboneClass({
 
 		// console.log(self.state.meta.stack);
 		var sources = _.map(self.state.bibtex.get("references"), function(cur){
-			return <li key={cur.citekey}>
-				{/*<Source data={cur.fields} authors={cur.fields.authors} />*/}
+			console.log(cur.entrykey);
+			return <li key={cur.entyrkey}>
+				<Source entry={cur} />
 			</li>;
 		});
 
-		return (<ol className="p-sources__list">
+
+		return (<ol className="p-bib__list" key="sources-list">
 			{sources}
 		</ol>);
 	},
