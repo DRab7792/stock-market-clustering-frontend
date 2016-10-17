@@ -9,6 +9,7 @@ config.app = {
 
 if (location && location.href){
 	var url = location.href;
+	config.app.baseUrl = url;
 	var cut = url.lastIndexOf("/");
 	url = url.substring(0, cut) + "/";
 	config.app.assetsUrl = url + "assets/";

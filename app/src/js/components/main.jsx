@@ -4,6 +4,7 @@ var React = require('react'),
 	Footer = require('./footer.jsx'),
 	Home = require('./home.jsx'),
 	Bib = require('./bib.jsx'),
+	Paper = require('./paper.jsx'),
 	Stack = require('./stack.jsx');
 
 var Main = React.createBackboneClass({
@@ -28,6 +29,22 @@ var Main = React.createBackboneClass({
 			actionHandler={this.props.app.actionHandler.bind(this.props.app)}
 		/>;
 
+		var paper = (this.props.curRoute != "paper") ? null : 
+		<Paper 
+			source="paper"
+			section={this.props.section}
+			router={this.props.app.router}
+			actionHandler={this.props.app.actionHandler.bind(this.props.app)}
+		/>;
+
+		var proposal = (this.props.curRoute != "proposal") ? null : 
+		<Paper 
+			source="proposal"
+			section={this.props.section}
+			router={this.props.app.router}
+			actionHandler={this.props.app.actionHandler.bind(this.props.app)}
+		/>;
+
 		return (<div>
 			<Header
 				page={this.props.curRoute}
@@ -39,6 +56,8 @@ var Main = React.createBackboneClass({
 					{home}
 					{stack}
 					{bib}
+					{paper}
+					{proposal}
 				</div>
 				<Footer/>
 			</div>

@@ -158,9 +158,9 @@ PageController.prototype.showHome = function(){
 	this.app.mainView.render("home");
 };
 
-PageController.prototype.showProposal = function(){
-	console.log("proposal");
-	this.app.mainView.render("proposal");
+PageController.prototype.showProposal = function(section){
+	console.log("proposal", section);
+	this.app.mainView.render("proposal", section);
 };
 
 PageController.prototype.showCode = function(){
@@ -178,19 +178,9 @@ PageController.prototype.showStack = function(){
 	this.app.mainView.render("stack");
 };
 
-PageController.prototype.showPaper = function(){
-	console.log("overview");
-	this.app.mainView.render("overview");
-};
-
-PageController.prototype.showSection = function(){
-	console.log("section");
-	this.app.mainView.render("section");
-};
-
-PageController.prototype.showSubsection = function(){
-	console.log("subsection");
-	this.app.mainView.render("subsection");
+PageController.prototype.showPaper = function(section){
+	console.log("paper", section);
+	this.app.mainView.render("paper", section);
 };
 
 module.exports = PageController;

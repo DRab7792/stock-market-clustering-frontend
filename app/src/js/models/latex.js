@@ -38,7 +38,8 @@ var Latex = Backbone.Model.extend({
             startAbstractRegex = /\\begin\{abstract\}/i,
             endAbstractRegex = /\\end\{abstract\}/i,
             sectionRegex = /\\section\{(.*)\}/i,
-            subsectionRegex = /\\subsection\{(.*)\}/i;
+            subsectionRegex = /\\subsection\{(.*)\}/i,
+            endRegex = /\\end\{document\}/i;
 
         if (conditions.author) line = line.replace("\\\\", "");
 
@@ -89,7 +90,14 @@ var Latex = Backbone.Model.extend({
             conditions.section = true;
             conditions.subsection = false;
         }else if (conditions.section){
-            if (!conditions.subsection && !subsectionRegex.test(line)){
+            if (endRegex.test(line)){
+                var sections = self.get("sections");
+                sections.push(deepCopy(data));
+                self.set("sections", sections);
+            }else if (line.indexOf("\\") === 0 && !subsectionRegex.test(line)){
+                //Do nothing. ie) bibliography tags at the end of the document
+                
+            }else if (!conditions.subsection && !subsectionRegex.test(line)){
                 data["content"] += line + "\n";
             }else if (subsectionRegex.test(line)){
                 //Save the title
@@ -103,14 +111,13 @@ var Latex = Backbone.Model.extend({
             }else if (conditions.subsection){
                 data["subsections"][(data["subsections"].length - 1)].content += line + "\n";
             }
+
         }
     },
 
     parse: function(data){
     	var self = this,
     		props = {};
-
-        console.log(JSON.stringify(self.get("authors")));
 
         //Nothing returned
         if (!data.length) return self;

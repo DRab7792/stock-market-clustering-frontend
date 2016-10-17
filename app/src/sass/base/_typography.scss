@@ -22,11 +22,18 @@ h6 {
 
 h2{
     font-family: $headers-font;
-    font-size: 32px;
+    font-size: 34px;
     text-align: center;
     margin-bottom: 20px;
     text-transform: uppercase;
     letter-spacing: 2px;
+}
+
+h3{
+    font-family: $headers-font;
+    font-size: 26px;
+    margin-bottom: 20px;
+    letter-spacing: 1px;
 }
 
 p {

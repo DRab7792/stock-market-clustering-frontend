@@ -4,8 +4,9 @@ var BaseView = require('../base-view'),
 	MainComponent = require('../components/main.jsx');
 
 var MainView = BaseView.extend({
-	render: function(curRoute){
+	render: function(curRoute, section){
 		this.options.curRoute = curRoute;
+		this.options.section = section;
 
 		ReactDOM.render(
 			<MainComponent 

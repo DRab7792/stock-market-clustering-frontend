@@ -1,0 +1,66 @@
+$nav-width: 50px;
+$container-height: 600px;
+$line-height: $larger-line-height;
+$font-size: $larger-font-size;
+
+
+.p-paper{
+	@include outer-container;
+	padding: $section-padding $header-padding;
+	font-size: $font-size;
+	line-height: $line-height;
+
+	&__toc{
+		@include span-columns(4);
+		position: relative;
+		overflow: hidden;
+		float: right;
+		text-align: left;
+		padding: 10px;
+		margin: 15px;
+		margin-top: 0px;
+		color: $color-primary;
+		border: 2px solid $color-primary;
+		background-color: rgba($color-tertiary, 0.3);
+
+		&-title{
+			display: block;
+			margin: 0px 0px 10px;
+			text-align: center;
+			letter-spacing: 1px;
+		}
+
+		&-list{
+			position: relative;
+			top: auto;
+			left: auto;
+			text-align: left;
+			list-style-type: decimal;
+			padding-left: 30px;
+
+			.c-sections__link{
+				display: list-item;
+
+				&:hover{
+					cursor: pointer;
+					opacity: .7;
+				}
+			}
+		}
+	}
+
+	&__paragraph{
+		margin: 0px 0px 30px;
+	}
+
+	&__heading{
+		text-transform: uppercase;
+		letter-spacing: 1px;
+		margin: 0px 0px 10px;
+	}
+
+	&__subheading{
+		letter-spacing: 1px;
+		margin: 0px 0px 10px;
+	}
+}

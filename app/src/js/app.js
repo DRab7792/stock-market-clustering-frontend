@@ -94,7 +94,7 @@ Application.prototype.startApp = function(){
 
 
 	this.controllers.pages.initialLoad(function(){
-		self.controllers.pages.showSources();
+		self.controllers.pages.showHome();
 	});
 };
 

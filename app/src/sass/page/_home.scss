@@ -1,8 +1,8 @@
 $hero-height: 400px;
 $title-width: 650px;
 $color-overlay: $color-primary;
-$line-height: 24px;
-$font-size: 17px;
+$line-height: $larger-line-height;
+$font-size: $larger-font-size;
 // $color-overlay: #333;
 
 .p-home-hero{

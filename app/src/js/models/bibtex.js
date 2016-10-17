@@ -15,6 +15,79 @@ var Bibtex = Backbone.Model.extend({
             this.url = this.options.url;
         }
     },
+    
+    extractAuthorListDefault: function(authors_string) {
+        var authors = authors_string.split(' and ').map(function(author) {
+            var namespl = author.split(', ');
+            if (namespl.length == 2) {
+                var lastName = author.split(', ')[0];
+                var firstName = author.split(', ')[1];
+                return firstName + ' ' + lastName;
+            } else {
+                return author;
+            }
+        });
+        if (authors.length > 1) {
+            authors = authors.slice(0, -1)
+                .reduceRight(function(previousValue, currentValue) {
+                    return currentValue + ', ' + previousValue;
+                }, 'and ' + authors.slice(-1));
+        } else {
+            authors = authors[0];
+        }
+
+        return authors;
+    },
+
+    parse: function(data){
+    	var self = this,
+    		props = {};
+
+        //Remove jabref comment
+        data = data.replace(/\@Comment\{(.*)\}/i,"");
+
+        var bibdata = parser(data);
+
+        //Adjust data
+        var adjData = _.map(bibdata.entries, function(cur){
+            //Lowercase object properties
+            for (var prop in cur) {
+                cur[prop.toLowerCase()] = cur[prop];
+                delete cur[prop];
+            }
+
+            //Lowercase field names
+            for (var prop in cur.fields) {
+                cur.fields[prop.toLowerCase()] = cur.fields[prop];
+            }
+
+            //Set type in fields as well
+            cur.fields.type = cur.entrytype;
+
+            //Extract authors
+            if (cur.fields.author) cur.fields.author = self.extractAuthorListDefault(cur.fields.author);
+
+            return cur;
+        });
+
+        function cmp(a, b){
+            return a.fields.author > b.fields.author;
+        }
+
+        adjData.sort(cmp);
+        self.set("references", adjData);
+
+    	return self;
+    }
+});
+
+
+module.exports = Bibtex;
+
+
+
+
+
 
     /**
      * Sort a bibtex collection using a given field
@@ -498,65 +571,3 @@ var Bibtex = Backbone.Model.extend({
 
     //     return html_str;
     // },
-    
-    extractAuthorListDefault: function(authors_string) {
-        var authors = authors_string.split(' and ').map(function(author) {
-            var namespl = author.split(', ');
-            if (namespl.length == 2) {
-                var lastName = author.split(', ')[0];
-                var firstName = author.split(', ')[1];
-                return firstName + ' ' + lastName;
-            } else {
-                return author;
-            }
-        });
-        if (authors.length > 1) {
-            authors = authors.slice(0, -1)
-                .reduceRight(function(previousValue, currentValue) {
-                    return currentValue + ', ' + previousValue;
-                }, 'and ' + authors.slice(-1));
-        } else {
-            authors = authors[0];
-        }
-
-        return authors;
-    },
-
-    parse: function(data){
-    	var self = this,
-    		props = {};
-
-        //Remove jabref comment
-        data = data.replace(/\@Comment\{(.*)\}/i,"");
-
-        var bibdata = parser(data);
-
-        //Adjust data
-        var adjData = _.map(bibdata.entries, function(cur){
-            //Lowercase object properties
-            for (var prop in cur) {
-                cur[prop.toLowerCase()] = cur[prop];
-                delete cur[prop];
-            }
-
-            //Lowercase field names
-            for (var prop in cur.fields) {
-                cur.fields[prop.toLowerCase()] = cur.fields[prop];
-            }
-
-            //Set type in fields as well
-            cur.fields.type = cur.entrytype;
-
-            //Extract authors
-            if (cur.fields.author) cur.fields.author = self.extractAuthorListDefault(cur.fields.author);
-
-            return cur;
-        });
-        self.set("references", adjData);
-
-    	return self;
-    }
-});
-
-
-module.exports = Bibtex;
