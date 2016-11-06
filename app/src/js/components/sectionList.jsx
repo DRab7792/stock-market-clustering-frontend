@@ -22,8 +22,8 @@ var SectionList = React.createBackboneClass({
 
 		var links = _.map(this.props.sections, function(cur){
 
-			return <li className="c-sections__link" key={cur.slug}>
-				<span onClick={self.handleNavClick} data-route={cur.slug}>{cur.title}</span>
+			return <li onClick={self.handleNavClick} data-route={cur.slug} className="c-sections__link" key={cur.slug}>
+				<span>{cur.title}</span>
 			</li>;
 		});
 

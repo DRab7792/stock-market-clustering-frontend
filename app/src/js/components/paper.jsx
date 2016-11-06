@@ -50,11 +50,12 @@ var Paper = React.createBackboneClass({
 		$(".p-paper__section").each(function(){
 			if ($(this).data("anchor") === section){
 				scroll = $(this).position().top;
+				scroll += $(".p-wrapper").scrollTop();
+				scroll -= 10; //Padding
 				return;
 			}
 		});
-		scroll += $(".p-wrapper").scrollTop();
-		scroll -= 10; //Padding
+		
 		
 		//Scroll to section
 		$(".p-wrapper").animate({
