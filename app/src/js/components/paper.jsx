@@ -3,12 +3,21 @@ var React = require('react'),
 	_  = require('underscore'),
 	async = require('async'),
 	SectionList = require('./sectionList.jsx'),
+	Source = require('./source.jsx'),
 	ReactDOM = require('react-dom'),
 	ReactBackbone = require('react.backbone');
 
+var contentKey = 0;
+
 var Paper = React.createBackboneClass({
 	getInitialState: function() {
-	    return { latex: null };
+	    return { 
+	    	latex: null,
+	    	overCitation: false,
+	    	overTooltip: false,
+	    	tooltipEntry: null,
+	    	tooltipLoc: null
+	    };
 	},
 	getLatex: function(callback){
 		var self = this;
@@ -34,36 +43,97 @@ var Paper = React.createBackboneClass({
 		var section = this.props.section,
 			scroll = 0;
 
+		//Find offset of section in relation to top of p wrapper
 		$(".p-paper__section").each(function(){
-
+			if ($(this).data("anchor") === section){
+				scroll = $(this).position().top;
+				return;
+			}
 		});
+		scroll += $(".p-wrapper").scrollTop();
+		scroll -= 10; //Padding
 		
-		$("body").animate({
+		//Scroll to section
+		$(".p-wrapper").animate({
 			scrollTop: scroll
 		}, 300);
 	},
-	insertCitations: function(str){
+	outCitation: function(){
+		console.log("Called");
+		this.setState({ overCitation: false });
+	},
+	showCitation: function(entry, key){
+		var loc = null;
+		$(".p-paper__content-citation").each(function(){
+			if ($(this).data("citationkey") === key){
+				loc = $(this).offset();
+			}
+		});
+		//Add for scroll position and subtract for header
+		loc.top += $(".p-wrapper").scrollTop();
+		loc.top -= $(".c-header").height();
+		if (!loc) return;
+
+		this.setState({
+			overCitation: true,
+			tooltipLoc: loc,
+			tooltipEntry: entry
+		});
+	},
+	formatContent: function(str){
+		if (
+			!this.state.latex || 
+			!this.state.latex.bibtex
+		){
+			console.log("Missing bibtex");
+			return;
+		}
 
 		var regex = /\\cite\{([A-Za-z]*)\}/g,
 			citation = regex.exec(str),
 			begin = 0,
-			newStr = "";
+			newContent = [],
+			self = this;
 
 		while (citation){
 			var start = citation.index,
 				length = citation[0].length,
 				end = (start + length),
-				key = citation[1];
+				key = citation[1],
+				num = 0,
+				entry = {};
 
-			//TODO: Find the citation in the bibtex model using the key
-			newStr += str.slice(begin, start) + " [1]";
+			//Get the number of the citation
+			var i = 1;
+			_.each(self.state.latex.bibtex.get("references"), function(cur){
+				if (key === cur.entrykey){
+					num = i;
+					entry = cur;
+					return false;
+				}
+				i++;
+			});
+			//Append to new string
+			newContent.push(
+				<span className="p-paper__content" onMouseOver={self.outCitation} key={contentKey}>{self.removeEscapeCharacters(str.slice(begin, start))}</span>
+			);
+			contentKey++;
+			if (num > 0){
+				newContent.push(
+					<span className="p-paper__content-citation" onMouseOver={self.showCitation.bind(self, entry, contentKey)} data-citationkey={contentKey}  key={contentKey}>{self.removeEscapeCharacters(" [" + num + "]")}</span>
+				);
+				contentKey++;
+			}
 
 			begin = end;
 			citation = regex.exec(str);
 		}
-		newStr += str.slice(begin);
+		newContent.push(
+			<span className="p-paper__content" onMouseOver={self.outCitation} key={contentKey}>{self.removeEscapeCharacters(str.slice(begin))}</span>
+		);
+		// console.log();
 
-		return newStr;
+		return newContent;
 	},
 	removeEscapeCharacters: function(str){
 		var adjStr = "";
@@ -88,15 +158,23 @@ var Paper = React.createBackboneClass({
 
 		self.getLatex();
 
-		self.scrollToSection();
+		window.setTimeout(function(){
+			self.scrollToSection();
+		}, 300);
+		
+	},
+	componentDidUpdate: function(prevProps, prevState) {
+		var self = this;
+		if (this.props.section !== prevProps.section){
+			self.scrollToSection();
+		}
 	},
 	createContent: function(content){
 		var self = this;
 		var paragraphs = content.split("\n");
 
 		var res = _.map(paragraphs, function(curContent){
-			curContent = self.insertCitations(curContent);
-			curContent = self.removeEscapeCharacters(curContent);
+			curContent = self.formatContent(curContent);
 			return <p className="p-paper__paragraph">
 				{curContent}
 			</p>;
@@ -113,12 +191,33 @@ var Paper = React.createBackboneClass({
 			var content = self.createContent(curSubsection.content);
 
 			return <div className="p-paper__subsection" key={curSubsection.slug} data-anchor={curSubsection.slug}>
-				<h4 className="p-paper__subheading">{sectionNum + "." + num + "  " + curSubsection.title}</h4>
+				<h4 className="p-paper__subheading" onMouseOver={self.outCitation}>{sectionNum + "." + num + "  " + curSubsection.title}</h4>
 				{content}
 			</div>;
 		});
 
 		return subsections;
+	},
+	outTooltip: function(){
+		this.setState({ overTooltip: false });
+	},
+	hoverTooltip: function(){
+		this.setState({ overTooltip: true });
+	},
+	formTooltip: function(){
+		if (
+			!(this.state.overCitation || this.state.overTooltip) ||
+			!this.state.tooltipEntry ||
+			!this.state.tooltipLoc
+		){
+			return;
+		}
+		// console.log("Over tooltip", this.state.overTooltip);
+		console.log("Over citation", this.state.overCitation);
+
+		return <div className="p-paper__tooltip" onMouseOver={this.hoverTooltip} onMouseLeave={this.outTooltip} style={this.state.tooltipLoc}>
+			<Source entry={this.state.tooltipEntry} />
+		</div>;
 	},
 	formSections: function(){
 		var self = this,
@@ -134,7 +233,7 @@ var Paper = React.createBackboneClass({
 			var subsections = self.createSubsections(cur.subsections, section);
 
 			return <div className="p-paper__section" key={cur.slug} data-anchor={cur.slug}>
-				<h3 className="p-paper__heading">{section + ".  " + cur.title}</h3>
+				<h3 className="p-paper__heading" onMouseOver={self.outCitation}>{section + ".  " + cur.title}</h3>
 				{paragraphs}
 				{subsections}
 			</div>;
@@ -155,9 +254,12 @@ var Paper = React.createBackboneClass({
 				extraClasses="p-paper__toc-list" />
 		</div>;
 
+		var tooltip = self.formTooltip();
+
 		var sections = self.formSections();
 		
 		return (<div className="p-paper">
+			{tooltip}
 			<h2 className="p-paper__title">{this.props.source.toTitleCase()}</h2>
 			{toc}
 			{sections}

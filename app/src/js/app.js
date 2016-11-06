@@ -94,9 +94,14 @@ Application.prototype.startApp = function(){
 
 
 	this.controllers.pages.initialLoad(function(){
-		self.controllers.pages.showHome();
+		if (window.localStorage.hash && window.localStorage.hash !== ""){
+			self.router.navigate(window.localStorage.hash);
+		}else{
+			self.controllers.pages.showHome();	
+		}
 	});
 };
+
 
 Application.prototype.actionHandler = function(id, data, callback){
 	//Check params

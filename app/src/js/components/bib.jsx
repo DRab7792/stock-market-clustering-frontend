@@ -42,7 +42,6 @@ var Bibliography = React.createBackboneClass({
 
 		// console.log(self.state.meta.stack);
 		var sources = _.map(self.state.bibtex.get("references"), function(cur){
-			console.log(cur.entrykey);
 			return <li key={cur.entyrkey}>
 				<Source entry={cur} />
 			</li>;

@@ -149,6 +149,9 @@ PageController.prototype.loadTex = function(callback){
 			});
 		}
 	], function(err){
+		self.proposal.bibtex = self.bib;
+		self.paper.bibtex = self.bib;
+
 		return callbackIn(err);
 	});
 }
@@ -158,7 +161,8 @@ PageController.prototype.showHome = function(){
 	this.app.mainView.render("home");
 };
 
-PageController.prototype.showProposal = function(section){
+PageController.prototype.showProposal = function(data){
+	var section = data[0];
 	console.log("proposal", section);
 	this.app.mainView.render("proposal", section);
 };
@@ -178,7 +182,8 @@ PageController.prototype.showStack = function(){
 	this.app.mainView.render("stack");
 };
 
-PageController.prototype.showPaper = function(section){
+PageController.prototype.showPaper = function(data){
+	var section = data[0];
 	console.log("paper", section);
 	this.app.mainView.render("paper", section);
 };

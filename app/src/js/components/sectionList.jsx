@@ -14,7 +14,6 @@ var SectionList = React.createBackboneClass({
 		var el = $(e.currentTarget);
 		var route = el.data("route");
 		route = this.props.source + "/" + route;
-		console.log(route);
 		this.props.router.navigate(route, {trigger: true});
 	},
 	render: function(){

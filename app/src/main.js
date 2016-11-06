@@ -1,5 +1,5 @@
 var app = require('electron').app,
-	shell = require('shell'),
+	open = require('open'),
 	BrowserWindow = require('electron')['BrowserWindow'];
 
 var mainWindow = null;
@@ -24,10 +24,10 @@ app.on('ready', function(){
 
 	mainWindow.loadURL(baseURL+'/index.html');
 
-	mainWindow.webContents.on('will-navigate', function(e, url) {
+	mainWindow.webContents.on('new-window', function(e, url) {
 		e.preventDefault();
 		if (url.indexOf("file://") === -1){
-			shell.openExternal(url);
+			open(url);
 		}
 	});
 

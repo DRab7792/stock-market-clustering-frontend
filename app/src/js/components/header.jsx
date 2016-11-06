@@ -123,6 +123,7 @@ var Header = React.createBackboneClass({
 		var el = $(e.currentTarget);
 		var route = el.data("route");
 
+
 		this.props.router.navigate(route, {trigger: true});
 	},
 	openDropdown: function(e){
