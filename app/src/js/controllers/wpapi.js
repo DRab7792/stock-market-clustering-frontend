@@ -24,4 +24,18 @@ ApiHandler.prototype.getOptions = function(callback){
 	});
 }
 
+ApiHandler.prototype.getVisuals = function(callback){
+	var url = config.app.wpApiUrl + "/wp/v2/visuals-api",
+		callback = callback || function(){};
+
+	request(url, function(err, res){
+		if (err){
+			return callback(err);
+		}
+
+		var data = JSON.parse(res.body);
+		return callback(null, data);
+	});
+}
+
 module.exports = ApiHandler;

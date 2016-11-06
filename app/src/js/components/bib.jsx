@@ -33,6 +33,7 @@ var Bibliography = React.createBackboneClass({
 	componentDidMount: function() {
 		var self = this;
 
+
 		self.getBibtex();
 	},
 	formSources: function(){

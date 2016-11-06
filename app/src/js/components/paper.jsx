@@ -7,12 +7,15 @@ var React = require('react'),
 	ReactDOM = require('react-dom'),
 	ReactBackbone = require('react.backbone');
 
-var contentKey = 0;
+var contentKey = 0,
+	curSection = "",
+	curParagraph = 1;
 
 var Paper = React.createBackboneClass({
 	getInitialState: function() {
 	    return { 
 	    	latex: null,
+	    	visuals: null,
 	    	overCitation: false,
 	    	overTooltip: false,
 	    	tooltipEntry: null,
@@ -59,7 +62,6 @@ var Paper = React.createBackboneClass({
 		}, 300);
 	},
 	outCitation: function(){
-		console.log("Called");
 		this.setState({ overCitation: false });
 	},
 	showCitation: function(entry, key){
@@ -153,10 +155,28 @@ var Paper = React.createBackboneClass({
 		}
 		return adjStr;
 	},
+	getVisuals: function(callback){
+		var self = this;
+		var callbackIn = (callback) ? callback : function(){};
+
+		this.props.actionHandler({
+	    	controller: "pages",
+	    	method: "getVisuals",
+	    }, {}, function(err, res){
+			if (err){
+				return console.log("Error getting options", err);
+			}
+
+			self.setState({
+				visuals: res,
+			}, callbackIn);
+		});
+	},
 	componentDidMount: function() {
 		var self = this;
 
 		self.getLatex();
+		self.getVisuals();
 
 		window.setTimeout(function(){
 			self.scrollToSection();
@@ -175,9 +195,35 @@ var Paper = React.createBackboneClass({
 
 		var res = _.map(paragraphs, function(curContent){
 			curContent = self.formatContent(curContent);
-			return <p className="p-paper__paragraph">
-				{curContent}
-			</p>;
+			var visual = null;
+
+			//Should any visualizations be inserted?
+			if (
+				self.state.visuals && 
+				self.state.visuals.models
+			){
+				_.each(self.state.visuals.models, function(cur){
+					var loc = cur.get("meta").loc, 
+						size = cur.get("meta").size;
+					if (loc.page === self.props.source && curSection === loc.section && curParagraph === parseInt(loc.paragraph)){
+						var styles = {
+							width: size.width + "%",
+							height: size.height + "px"
+						};
+
+						visual = <div className="c-visual" style={styles}>
+						</div>;
+					}
+				});
+			}
+
+			curParagraph++;
+			return <div>
+				{visual}
+				<p className="p-paper__paragraph">
+					{curContent}
+				</p>
+			</div>;
 		});
 		return res;
 	},
@@ -213,7 +259,7 @@ var Paper = React.createBackboneClass({
 			return;
 		}
 		// console.log("Over tooltip", this.state.overTooltip);
-		console.log("Over citation", this.state.overCitation);
+		// console.log("Over citation", this.state.overCitation);
 
 		return <div className="p-paper__tooltip" onMouseOver={this.hoverTooltip} onMouseLeave={this.outTooltip} style={this.state.tooltipLoc}>
 			<Source entry={this.state.tooltipEntry} />
@@ -227,7 +273,8 @@ var Paper = React.createBackboneClass({
 		var section = 0;
 		sections = _.map(self.state.latex.get("sections"), function(cur){
 			section++;
-			// console.log(cur);
+			curParagraph = 1;
+			curSection = cur.slug;
 
 			var paragraphs = self.createContent(cur.content);
 			var subsections = self.createSubsections(cur.subsections, section);

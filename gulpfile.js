@@ -186,8 +186,7 @@ gulp.task('run', function(){
 	process.env.NODE_ENV = 'dev';
 	livereload.listen();
 	return run('electron app/build/main.js')
-		.exec()
-		.pipe(gulp.dest('output'));
+		.exec();
 });
 
 //Package the final product into an app for Windows, Linux and Mac

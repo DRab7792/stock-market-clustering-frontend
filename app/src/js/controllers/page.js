@@ -1,4 +1,5 @@
 var PageCollection = require('../collections/pages'),
+	VisualCollection = require('../collections/visualizations'),
 	request = require('request'),
 	async = require('async'),
 	Latex = require('../models/latex'),
@@ -12,6 +13,7 @@ var PageController = function(options){
 	this.paper = null;
 	this.proposal = null;
 	this.bib = null;
+	this.visuals = [];
 };
 
 PageController.prototype.initialLoad = function(callback){
@@ -71,6 +73,19 @@ PageController.prototype.loadPages = function(callback){
 
 	this.pages.fetch({}, function(){
 		return callbackIn();
+	});
+};
+
+PageController.prototype.getVisuals = function(opts, callback){
+	var self = this,
+		callbackIn = (callback) ? callback : function(){};
+
+	self.visuals = new VisualCollection({
+		wpApi: this.app.controllers.wpApi
+	});
+
+	this.visuals.fetch({}, function(){
+		return callbackIn(null, self.visuals);
 	});
 };
 
