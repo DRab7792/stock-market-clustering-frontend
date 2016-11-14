@@ -7,6 +7,7 @@ var gulp = require('gulp'),
 	browserify = require('browserify'),
 	ejs = require('gulp-ejs'),
 	fs = require('fs'),
+	debug = require('gulp-debug'),
 	_ = require('underscore'),
 	jsonSass = require('gulp-json-sass'),
 	clean = require('gulp-clean'),
@@ -22,6 +23,8 @@ var gulp = require('gulp'),
 	sass = require('gulp-sass'),
 	icon = require('icon-gen'),
 	request = require('request');
+
+var DSL = require('./dsl');
 
 const options = {
 			report: true,
@@ -222,6 +225,19 @@ gulp.task('package', function() {
 	    .pipe(gulp.dest(""));
 });
 
+//Gulp tasks for the DSL
+gulp.task('data', function(){
+	DSL.extractKaggleDataset()
+		.then(DSL.getCompanySymbols)
+		.then(DSL.getCompanyAttributes)
+		.then(DSL.getIndustries)
+		.then(DSL.getStockHistory)
+		.then(DSL.saveCompanies)
+		.catch(function(err){
+			console.log(err);
+			return;
+		});
+});
 
 //Define all the tasks
 gulp.task('default', ['dev', 'watch']);
