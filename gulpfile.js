@@ -233,15 +233,25 @@ gulp.task('data', function(){
 		.then(DSL.getIndustries)
 		.then(DSL.getStockHistory)
 		.then(DSL.saveCompanies)
+		.then(DSL.createCompanyList)
 		.catch(function(err){
 			console.log(err);
 			return;
 		});
 });
 
+//Import the data to the build
+gulp.task('importData', function(){
+	gulp.src("data/companies/*.json")
+		.pipe(gulp.dest("app/build/data/"));
+
+	return gulp.src("data/companies/*.json")
+		.pipe(gulp.dest("app/src/data/"));
+});
+
 //Define all the tasks
 gulp.task('default', ['dev', 'watch']);
-gulp.task('compile', ['importSassVars', 'sass', 'js', 'assets', 'root']);
+gulp.task('compile', ['importSassVars', 'sass', 'js', 'assets', 'root', 'importData']);
 gulp.task('watch', ['importSassVars', 'watchJs', 'watchSass', 'watchAssets']);
 gulp.task('dev', ['compile', 'run']);
 gulp.task('prod', function(){

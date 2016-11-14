@@ -257,5 +257,31 @@ module.exports = {
 				return resolve();
 			});
 		});
+	},
+	createCompanyList: function(){
+		return new Promise(function(resolve, reject){
+			fs.readdir('data/companies', function(err, files){
+				if (err){
+					console.log("Error getting file names", err);
+					return reject(err);
+				}
+
+				var companies = [];
+				_.each(files, function(cur){
+					var company = cur.substring(0, cur.indexOf("."));
+
+					companies.push(company);
+				});
+
+				fs.writeFile('data/companies/directory.json', JSON.stringify(companies), function(err){
+					if (err){
+						console.log("Error writing companies json", err);
+						return reject(err);
+					}
+
+					return resolve();
+				});
+			});
+		});
 	}
 };

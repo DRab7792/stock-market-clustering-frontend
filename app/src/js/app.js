@@ -2,6 +2,7 @@ var Backbone = require('backbone'),
 	Router = require('./router'),
 	MainView = require('./views/main'),
 	PageController = require('./controllers/page'),
+	DataController = require('./controllers/data'),
 	config = require('./config'),
 	WpController = require('./controllers/wpapi');
 
@@ -70,6 +71,7 @@ Application.prototype.initialize = function(){
 	this.controllers = {
 		wpApi: new WpController({ app: this }),
 		pages: new PageController({ app: this }),
+		data: new DataController({ app: this }),
 		// paper: new PaperController({ app: this }),
 		// proposal: new PaperController({ app: this }),
 		// sources: new BibController({ app: this }),
@@ -93,12 +95,14 @@ Application.prototype.startApp = function(){
 	Backbone.history.start({ pushState: true });
 
 
-	this.controllers.pages.initialLoad(function(){
-		if (window.localStorage.hash && window.localStorage.hash !== ""){
-			self.router.navigate(window.localStorage.hash);
-		}else{
-			self.controllers.pages.showHome();	
-		}
+	self.controllers.pages.initialLoad(function(){
+		self.controllers.data.initialLoad(function(){
+			if (window.localStorage.hash && window.localStorage.hash !== ""){
+				self.router.navigate(window.localStorage.hash);
+			}else{
+				self.controllers.pages.showHome();	
+			}
+		});
 	});
 };
 

@@ -16,6 +16,7 @@ if (location && location.href){
 	var cut = url.lastIndexOf("/");
 	url = url.substring(0, cut) + "/";
 	config.app.assetsUrl = url + "assets/";
+	config.app.dataUrl = url + "data/";
 }
 
 module.exports = config;
