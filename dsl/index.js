@@ -268,9 +268,9 @@ module.exports = {
 
 				var companies = [];
 				_.each(files, function(cur){
-					var company = cur.substring(0, cur.indexOf("."));
+					var company = cur.substring(0, cur.indexOf(".json"));
 
-					companies.push(company);
+					if (company !== "directory") companies.push(company);
 				});
 
 				fs.writeFile('data/companies/directory.json', JSON.stringify(companies), function(err){

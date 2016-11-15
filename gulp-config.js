@@ -12,7 +12,8 @@ config.kaggle = {
 		'Cash',
 		'IncomeTaxesPaid',
 		'ProfitLoss',
-		'Revenues'
+		'Revenues',
+		'Size'
 	],
 	maxCompanies: 200
 };

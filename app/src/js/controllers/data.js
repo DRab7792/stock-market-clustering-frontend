@@ -35,9 +35,22 @@ DataController.prototype.loadCompanies = function(callback){
 
 	self.companies = new CompanyCollection();
 
-	this.companies.fetch({}, function(){
+	this.companies.fetchAll({}, function(){
 		return callbackIn();
 	});
 };
+
+DataController.prototype.getAllCompanies = function(options, callback){
+	var self = this;
+	var callbackIn = callback ? callback : function(){};
+
+	if (!self.companies){
+		return self.loadCompanies(function(){
+			callbackIn(null, self.companies);
+		});
+	}else{
+		return callbackIn(null, self.companies);
+	}
+}
 
 module.exports = DataController;
