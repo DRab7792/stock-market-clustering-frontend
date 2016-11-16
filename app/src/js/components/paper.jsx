@@ -4,7 +4,6 @@ var React = require('react'),
 	async = require('async'),
 	SectionList = require('./sectionList.jsx'),
 	Source = require('./source.jsx'),
-	Histogram = require('./histogram.jsx'),
 	ReactDOM = require('react-dom'),
 	ReactBackbone = require('react.backbone');
 
@@ -12,7 +11,7 @@ var contentKey = 0,
 	curSection = "",
 	curParagraph = 1;
 
-var Paper = React.createBackboneClass({
+var PaperBase = {
 	getInitialState: function() {
 	    return { 
 	    	latex: null,
@@ -178,8 +177,23 @@ var Paper = React.createBackboneClass({
 		var self = this;
 
 		self.getLatex();
-		self.getVisuals();
+		self.getVisuals(function(){
+			//Initiate the visuals
+			_.each(self.state.visuals.models, function(cur){
+				var loc = cur.get("meta").loc;
+				if (loc.page === self.props.source){
+					var type = cur.get("meta").data.type;
 
+					// console.log(self);
+					self.visuals[type].initiate({
+						props: cur,
+						actionHandler: self.props.actionHandler
+					});
+				}
+			});
+		});
+
+		//Scroll to section after DOM is fully loaded
 		window.setTimeout(function(){
 			self.scrollToSection();
 		}, 300);
@@ -207,25 +221,14 @@ var Paper = React.createBackboneClass({
 				_.each(self.state.visuals.models, function(cur){
 					var loc = cur.get("meta").loc, 
 						size = cur.get("meta").size,
-						id = cur.get("wpid"),
-						type = cur.get("meta").data.type;
+						id = cur.get("wpid");
 					if (loc.page === self.props.source && curSection === loc.section && curParagraph === parseInt(loc.paragraph)){
 						var styles = {
 							width: size.width + "%",
 							height: size.height + "px"
 						};
 
-						var svg = null;
-						if (type === "histogram"){
-							svg = <Histogram 
-									actionHandler={self.props.actionHandler}
-									wpInfo={cur}
-								/>;
-						}
-
-						visual = <div className="c-visual" data-id={id} style={styles}>
-							{svg}
-						</div>;
+						visual = <div className="c-visual" id={id} style={styles}></div>;
 					}
 				});
 			}
@@ -325,6 +328,11 @@ var Paper = React.createBackboneClass({
 			{sections}
 		</div>);
 	}
-});
+};
+
+
+require('./visuals')(PaperBase);
+var Paper = React.createBackboneClass(PaperBase);
+
 
 module.exports = Paper;
