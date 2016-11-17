@@ -1,6 +1,7 @@
 var CompanyCollection = require('../collections/companies'),
 	request = require('request'),
 	async = require('async'),
+	_ = require("underscore"),
 	company = require('../models/company');
 
 var DataController = function(options){
@@ -52,5 +53,50 @@ DataController.prototype.getAllCompanies = function(options, callback){
 		return callbackIn(null, self.companies);
 	}
 }
+
+DataController.prototype.getCompaniesBySectors = function(options, callback){
+	var self = this;
+	var sectors = [];
+	var callbackIn = callback ? callback : function(){};
+	//Check the parameters
+	if (!options.sectors){
+		return callbackIn("Missing sectors");
+	}
+
+	//Make sure the companies have been loaded
+	if (!self.companies){
+		return callbackIn("No companies");
+	}
+
+	//Form the sectors array, async just in case
+	async.each(options.sectors, function(cur, done){
+		var curSector = new CompanyCollection();
+
+		_.each(self.companies.models, function(comp){
+			if (
+				!comp.get("category") || 
+				!comp.get("category").sector
+			){
+				return;
+			}
+
+			if (comp.get("category").sector === cur){
+				curSector.add(comp);
+			}
+		});
+
+		sectors.push(curSector);
+
+		return done();
+	}, function(err){
+		//Handle error
+		if (err){
+			return callbackIn(err);
+		}
+
+		//Return array of company collections
+		return callbackIn(null, sectors);
+	});
+};
 
 module.exports = DataController;

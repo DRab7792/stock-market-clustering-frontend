@@ -19,24 +19,34 @@ var Price = Backbone.Model.extend({
     parse: function(data){
     	var self = this, props = {};
 
-    	props.symbol = (data.symbol) ? data.symbol : '';   
+    	props.symbol = (data.Symbol) ? data.Symbol : '';   
 
-    	props.date = (data.date) ? data.date : '';   
+    	props.date = (data.Date) ? data.Date : '';   
 
-    	props.open = (data.open) ? data.open : 0;
+    	props.open = (data.Open) ? parseFloat(data.Open) : 0;
 
-    	props.high = (data.high) ? data.high : 0;
+    	props.high = (data.High) ? parseFloat(data.High) : 0;
 
-    	props.low = (data.low) ? data.low : 0;
+    	props.low = (data.Low) ? parseFloat(data.Low) : 0;
 
-    	props.close = (data.close) ? data.close : 0;   
+    	props.close = (data.Close) ? parseFloat(data.Close) : 0;   
 
-    	props.volume = (data.volume) ? data.volume : 0;   
+    	props.volume = (data.Volume) ? parseInt(data.Volume) : 0;   
 
 		self.attributes = props;   	
 
     	return self;
-    }
+    },
+
+    getAverage: function(){
+    	var self = this;
+
+    	if (self.get("high") && self.get("low")){
+    		return (self.get("high") + self.get("low")) / 2;
+    	}else{
+    		return null;
+    	}
+    },
 });
 
 module.exports = Price;
