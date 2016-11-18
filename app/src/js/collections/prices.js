@@ -20,8 +20,38 @@ var prices = Backbone.Collection.extend({
 			self.add(curPrice);
 		});
 
+		self.getMeanPrice();
+		self.getStdDeviation();
+
 		return self;
 	},
+	getStdDeviation: function(){
+		var self = this;
+
+		var mean = self.mean,
+			sumSqrd = 0;
+
+		//Calculate the sum squared
+		_.each(self.models, function(cur){
+			var x = cur.getAverage();
+			sumSqrd += (x - mean) * (x - mean);
+		});
+
+		var variance = sumSqrd / (self.models.length - 1);
+		
+		self.stdDeviation = Math.pow(variance, 0.5);
+	},
+	getMeanPrice: function(){
+		var self = this;
+		var sum = 0;
+
+		//Sum of average prices for each day
+		_.each(self.models, function(cur){
+			sum += cur.getAverage();
+		});
+
+		self.mean = (sum / self.models.length);
+	}
 });
 
 module.exports = prices;

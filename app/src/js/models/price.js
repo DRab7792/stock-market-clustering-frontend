@@ -47,6 +47,16 @@ var Price = Backbone.Model.extend({
     		return null;
     	}
     },
+
+    getStdDeviations: function(mean, stdDev){
+        var self = this;
+
+        var avg = self.getAverage();
+
+        var diff = mean - avg;
+
+        return diff / stdDev;
+    }
 });
 
 module.exports = Price;
