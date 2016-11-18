@@ -12,6 +12,7 @@ var stockPrices = {
 		lines: [],
 		maxPrice: 0,
 		colors: ["#F15A5A", "#F0C419", "#4EBA6F", "#2D95BF", "#955BA5"],
+		legend: [],
 		startDate: moment(),
 		endDate: moment("1970-01-01", "YYYY-MM-DD")
 	},
@@ -22,6 +23,30 @@ var stockPrices = {
 		self.loadData(function(){
 			self.prepareData();
 			self.draw();
+			self.setupDefault();
+		});
+	},
+	setupDefault: function(){
+		var self = this;
+		
+		if (
+			!self.options.props || 
+			!self.options.props.get("meta") ||
+			!self.options.props.get("meta").data || 
+			!self.options.props.get("meta").data.defaults
+		) return;
+
+		//Get Defaults
+		var defaults = self.options.props.get("meta").data.defaults;
+
+		//Iterate through sectors
+		self.data.sectors.forEach(function(cur, i){
+			var curSectorLabel = cur.models[0].get("category").sector;
+
+			//If the current sector is not in the defaults, fade them
+			if (!_.contains(defaults, curSectorLabel)){
+				self.legendClick(i);
+			}
 		});
 	},
 	loadData: function(callback){
@@ -59,6 +84,7 @@ var stockPrices = {
 		//Get the frequencies of all the companies by category
 		_.each(self.data.sectors, function(curSector){
 			var curSectorLabel = curSector.models[0].get("category").sector;
+			var sectorLines = [];
 			
 			//Iterate through the sector's companies
 			_.each(curSector.models, function(curComp){
@@ -100,13 +126,25 @@ var stockPrices = {
 					curLine.points.push(point);
 				});
 
-				lines.push(curLine);
+				sectorLines.push(curLine);
 			});
+
+			lines.push(sectorLines);
 			i++;
 		});
 
 		self.data.startDate.subtract(10, 'days');
 		self.data.endDate.add(10, 'days');
+
+		//Form the legend data
+		self.data.sectors.forEach(function(curSector, i){
+			var curSectorLabel = curSector.models[0].get("category").sector;
+			var color = self.data.colors[i];
+			self.data.legend.push({
+				color: color,
+				label: curSectorLabel
+			});
+		});
 
 		//Save lines
 		self.data.lines = lines;
@@ -138,13 +176,14 @@ var stockPrices = {
 		var height = dimensions.height;
 
 		//Set up the scales
-		var margin = {top: 50, right: 60, bottom: 80, left: 60};
+		var margin = {top: 50, right: 100, bottom: 80, left: 60};
 
-		var dates = self.data.lines[0].points.length;
+		// console.log(self.data.lines);
+		var dates = self.data.lines[0][0].points.length;
 		var minX = margin.left;
 		var maxX = width - margin.right;
 
-		console.log(self.data.startDate.format("YYYY-MM-DD"), self.data.endDate.format("YYYY-MM-DD"));
+		// console.log(self.data.startDate.format("YYYY-MM-DD"), self.data.endDate.format("YYYY-MM-DD"));
 		var xScale = d3.scaleTime()
 			.domain([self.data.startDate, self.data.endDate])
 			.range([minX, maxX]);
@@ -189,7 +228,8 @@ var stockPrices = {
 			.attr("class", self.classPrefix + "__lines");
 			// .attr("transform", "translate(-" + margin.left + ",0)");
 
-		_.each(self.data.lines, function(cur){
+		var i = 0;
+		_.each(self.data.lines, function(curGroup){
 
 			var line = d3.line()
 				.x(function(d){ 
@@ -201,43 +241,78 @@ var stockPrices = {
 				})
 				.y(function(d){ return yScale(d.price); });
 
-			lineContainer.append("path")
-				.datum(cur.points)
-				.attr("class", function(){
-					var str = self.classPrefix + "__line ";
-					return str;
-				})
-				.attr("d", line)
-				.attr("stroke", function(d){
-					console.log(cur.color);
-					return cur.color;
-				});
+			var lineGroup = lineContainer.append("g")
+				.attr("class", self.classPrefix + "__group")
+				.attr("id", "group"+i);
+
+			_.each(curGroup, function(cur){
+
+				lineGroup.append("path")
+					.datum(cur.points)
+					.attr("class", function(){
+						var str = self.classPrefix + "__line ";
+						return str;
+					})
+					.attr("d", line)
+					.attr("stroke", function(d){
+						return cur.color;
+					});
+
+			});
+
+			i++;
 		});
 
-		// var bars = lineContainer.selectAll(self.classPrefix + "__line")
-		// 	.data(self.data.lines)
-		// 	.enter().append("rect")
-		// 	.attr("class", self.classPrefix + "__bar")
-		// 	.attr("x", function(d){
-		// 		return xScale(d.key);
-		// 	})
-		// 	.attr("y", function(d){
-		// 		return yScale(d.val);
-		// 	})
-		// 	.attr("width", step)
-		// 	.attr("height", function(d){
-		// 		return yScale(0) - yScale(d.val);
-		// 	})
-		// 	.on("mouseover", function(d){
-		// 		var str = "";
-		// 		str += "<tspan dy='1.1em' x='0' class='" + self.classPrefix + "__legend-category'>" + d.key + "</tspan>";
-		// 		str += "<tspan dy='1.1em' x='0'>" + d.val + " companies</tspan>";
-		// 		legend.html(str)
-		// 			.attr("class", self.classPrefix + "__legend " + self.classPrefix + "__legend__show");
-		// 	})
-		// 	.on("mouseout", function(d){
-		// 		legend.attr("class", self.classPrefix + "__legend");
-		// 	});
+		self.lines = lineContainer;
+
+		//Add the legend
+		var legendGap = 50;
+		var legend = svg.append("g")
+			.attr("class", self.classPrefix + "__legend");
+
+		legend.selectAll("." + self.classPrefix + "__legend-color")
+			.data(self.data.legend)
+			.enter().append("rect")
+			.attr("class", self.classPrefix + "__legend-color")
+			.attr("x", (width - margin.right) + 5)
+			.attr("y", function(d, i){
+				return (margin.top + (i * legendGap));
+			})
+			.attr("width", 10)
+			.attr("height", 10)
+			.attr("fill", function(d){
+				return d.color;
+			})
+			.attr("id", function(d, i){
+				return "color" + i;
+			})
+			.on("click", function(d, i){
+				self.legendClick(i);
+			});
+
+		legend.selectAll("." + self.classPrefix + "__legend-label")
+			.data(self.data.legend)
+			.enter().append("text")
+			.attr("class", self.classPrefix + "__legend-label")
+			.attr("transform", function(d, i){
+				var offset = (d.label.indexOf(" ") === -1) ? -3 : -10;
+				return "translate(" + ((width - margin.right) + 20) + ", " + (margin.top + (i * legendGap) + offset) + ")";
+			})
+			.html(function(d){
+				var str = "";
+				var lines = d.label.split(" ");
+				str += "<tspan dy='1em' x='0'>" + lines[0] + "</tspan>";
+				if (lines.length > 1) str += "<tspan dy='1em' x='0'>" + lines[1] + "</tspan>";
+				return str;
+			})
+			.attr("id", function(d, i){
+				return "label" + i;
+			})
+			.on("click", function(d, i){
+				self.legendClick(i);
+			});
+
+		self.legend = legend;
 
 		//Add titles to the axes
         svg.append("text")
@@ -260,6 +335,22 @@ var stockPrices = {
             .text(self.options.props.get("meta").misc.title);
 
 		self.svg = svg;
+	},
+	legendClick: function(index){
+		var self = this;
+
+		//Get all elements
+		var lineGroup = self.svg.select("#group" + index),
+			color = self.svg.select("#color" + index),
+			label = self.svg.select("#label" + index);
+
+		//Is the current state faded?
+		var isFaded = lineGroup.classed(self.classPrefix + "__group__faded");
+
+		//Toggle classes for all elements
+		lineGroup.classed(self.classPrefix + "__group__faded", !isFaded);
+		color.classed(self.classPrefix + "__legend-color__faded", !isFaded);
+		label.classed(self.classPrefix + "__legend-label__faded", !isFaded);
 	}
 };
 

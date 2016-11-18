@@ -1,3 +1,5 @@
+$legend-fade: 0.3;
+
 .c-visual{
 	display: block;
 	margin: 20px auto;
@@ -8,21 +10,6 @@
 	&__title{
 		font-family: $headers-font;
 		font-size: 26px;
-	}
-
-
-	&__legend{
-		display: none;
-		font-size: $larger-font-size;
-		font-family: $body-font;
-
-		&-category{
-			// text-decoration: underline;
-		}
-
-		&__show{
-			display: block;
-		}
 	}
 	
 
@@ -45,6 +32,20 @@
 
 
 .c-histogram{
+	&__legend{
+		display: none;
+		font-size: $larger-font-size;
+		font-family: $body-font;
+
+		&-category{
+			// text-decoration: underline;
+		}
+
+		&__show{
+			display: block;
+		}
+	}
+
 	&__bars:hover &__bar{
 		opacity: 0.7;
 	}
@@ -60,9 +61,42 @@
 }
 
 .c-stockPrices{
+	&__legend{
+		&-color{
+			stroke: $color-darker-gray;
+			stroke-width: 1px;
+
+			&__faded{
+				opacity: $legend-fade;
+			}
+		}
+
+		&-label{
+			font-family: $body-font;
+			font-size: $base-font-size;
+
+			&__faded{
+				opacity: $legend-fade;
+			}
+		}
+
+		&:hover{
+			cursor: pointer;
+		}
+	}
+
+	&__group{
+		&__faded{
+			opacity: 0;
+		}
+	}
+
 	&__line{
 		stroke-width: 1px;
-		
 		fill: rgba(0,0,0,0);
+
+		&__faded{
+			opacity: $legend-fade;
+		}
 	}
 }
