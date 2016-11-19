@@ -7,7 +7,14 @@ config.app = {
 	clearbit: {
 		api_key: "sk_1281a353f301a17827058fd90a480834"
 	},
-	movingAvgWindow: 15
+	movingAvgWindow: 15,
+	chartColors: [
+		"#F15A5A", 
+		"#F0C419", 
+		"#4EBA6F", 
+		"#2D95BF", 
+		"#955BA5"
+	]
 };
 
 

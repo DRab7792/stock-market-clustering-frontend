@@ -10,7 +10,10 @@ var Price = Backbone.Model.extend({
 		high: 0,
 		low: 0,
 		close: 0,
-		volume: 0
+		volume: 0,
+        average: 0,
+        stdDeviations: 0,
+        smoothedStdDeviations: 0
 	},
 
 	initialize: function(options){

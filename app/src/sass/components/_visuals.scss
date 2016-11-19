@@ -3,9 +3,16 @@ $legend-fade: 0.3;
 .c-visual{
 	display: block;
 	margin: 20px auto;
+	
 
 	&__graphic{
 		width: 100%;
+		opacity: 0;
+		transition: opacity $base-duration $base-timing;
+
+		&__show{
+			opacity: 1;
+		}
 	}
 
 	&__caption{
@@ -20,7 +27,7 @@ $legend-fade: 0.3;
 	}
 }
 
-.c-histogram, .c-stockPrices{
+.c-histogram, .c-lineChart{
 
 	&__title{
 		font-family: $headers-font;
@@ -80,7 +87,7 @@ $legend-fade: 0.3;
 	}
 }
 
-.c-stockPrices{
+.c-lineChart{
 	&__legend{
 		&-color{
 			stroke: $color-darker-gray;

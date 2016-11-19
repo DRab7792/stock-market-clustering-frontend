@@ -6,15 +6,14 @@ var _ = require("underscore"),
 	scale = require("d3-scale"),
 	axis = require("d3-axis");
 
-var lineChart = {
-	classPrefix: "c-lineChart",
+var varianceChart = {
+	classPrefix: "c-variance",
 	data: {
 		sectors: [],
 		lines: [],
 		maxY: 0,
-		function: "average",
 		minY: 1000,
-		colors: config.app.chartColors,
+		colors: ["#F15A5A", "#F0C419", "#4EBA6F", "#2D95BF", "#955BA5"],
 		legend: [],
 		startDate: moment(),
 		endDate: moment("1970-01-01", "YYYY-MM-DD")
@@ -22,13 +21,6 @@ var lineChart = {
 	initiate: function(options){
 		var self = this;
 		self.options = options || {};
-
-		if (
-			self.options.props && 
-			self.options.props.get("meta") &&
-			self.options.props.get("meta").data && 
-			self.options.props.get("meta").data.function
-		) self.data.function = self.options.props.get("meta").data.function;
 
 		self.loadData(function(){
 			self.prepareData();
@@ -82,20 +74,6 @@ var lineChart = {
 				return console.log("Error getting companies", err);
 			}
 
-			if (self.data.function === "stdDeviation"){
-				_.each(res, function(curSector){
-					_.each(curSector.models, function(curComp){
-						if (curComp.get("stockPrices")) curComp.get("stockPrices").calculateStandardDeviations();
-					});
-				});
-			}else if (self.data.function === "smooth"){
-				_.each(res, function(curSector){
-					_.each(curSector.models, function(curComp){
-						if (curComp.get("stockPrices")) curComp.get("stockPrices").getMovingMean();
-					});
-				});
-			}
-
 			self.data.sectors = res;
 			return callback();
 		});
@@ -103,7 +81,14 @@ var lineChart = {
 	prepareData: function(){
 		var self = this;
 		
-		var lines = [], i = 0, func = self.data.function;
+		var lines = [], i = 0, func = "average";
+
+		if (
+			self.options.props && 
+			self.options.props.get("meta") &&
+			self.options.props.get("meta").data && 
+			self.options.props.get("meta").data.function
+		) func = self.options.props.get("meta").data.function;
 		
 		//Get the frequencies of all the companies by category
 		_.each(self.data.sectors, function(curSector){
@@ -115,7 +100,6 @@ var lineChart = {
 				var curLine = {
 					sector: curSectorLabel,
 					color: self.data.colors[i],
-					companyName: curComp.get("name"),
 					points: []
 				};
 
@@ -203,10 +187,10 @@ var lineChart = {
 
 		//Get the container
 		var visualId = self.options.props.get("wpid");
-		self.container = $(".c-visual#" + visualId + " .c-visual__graphic");
+		var container = $(".c-visual#" + visualId + " .c-visual__graphic");
 		
 		//Append the svg tag
-		var svg = d3.select(self.container[0]);
+		var svg = d3.select(container[0]);
 
 		//Get pixel dimensions
 		var dimensions = svg.node().getBoundingClientRect();
@@ -306,12 +290,10 @@ var lineChart = {
 						return cur.color;
 					})
 					.on("mouseover", function(){
-						// console.log(this);
-						console.log("Company", cur.companyName);
-						// d3.select(this).attr("class", self.classPrefix + "__line " + self.classPrefix + "__line__bold");
+						self.lineHover.bind(this)();
 					})
 					.on("mouseout", function(){
-						// d3.select(this).attr("class", self.classPrefix + "__line");
+						self.lineBlur.bind(this)();
 					});
 
 				lineNum++;
@@ -392,13 +374,6 @@ var lineChart = {
             .text(self.options.props.get("meta").misc.title);
 
 		self.svg = svg;
-
-		// self.showGraphic();
-	},
-	showGraphic: function(){
-		var self = this;
-
-		self.container.addClass("c-visual__graphic__show");
 	},
 	legendClick: function(index){
 		var self = this;
@@ -415,9 +390,17 @@ var lineChart = {
 		lineGroup.classed(self.classPrefix + "__group__faded", !isFaded);
 		color.classed(self.classPrefix + "__legend-color__faded", !isFaded);
 		label.classed(self.classPrefix + "__legend-label__faded", !isFaded);
+	},
+	lineHover: function(d, i){
+		//Bold the line
+		d3.select(this).classed(self.classPrefix + "__line__bold", true);
+	},
+	lineBlur: function(d, i){
+		//Unbold the line
+		d3.select(this).classed(self.classPrefix + "__line__bold", false);
 	}
 };
 
 module.exports = function(component){
-	component.lineChart = lineChart;
+	component.varianceChart = varianceChart;
 };

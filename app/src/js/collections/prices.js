@@ -40,16 +40,17 @@ var prices = Backbone.Collection.extend({
 		//Sort prices by date
 		self.sort();
 
+		return self;
+	},
+	calculateStandardDeviations: function(){
+		var self = this;
+
 		self.getMeanPrice();
 		self.getStdDeviation();
 
 		_.each(self.models, function(cur){
 			cur.getStdDeviations(self.mean, self.stdDeviation);
 		});
-
-		self.getMovingMean();
-
-		return self;
 	},
 	getStdDeviation: function(){
 		var self = this;

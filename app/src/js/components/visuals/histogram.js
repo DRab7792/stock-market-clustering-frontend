@@ -93,10 +93,10 @@ var histogram = {
 
 		//Get the container
 		var visualId = self.options.props.get("wpid");
-		var container = $(".c-visual#" + visualId + " .c-visual__graphic");
+		self.container = $(".c-visual#" + visualId + " .c-visual__graphic");
 		
 		//Append the svg tag
-		var svg = d3.select(container[0]);
+		var svg = d3.select(self.container[0]);
 
 		//Get pixel dimensions
 		var dimensions = svg.node().getBoundingClientRect();
@@ -222,7 +222,12 @@ var histogram = {
             .text(self.options.props.get("meta").misc.title);
 
 		self.svg = svg;
-	}
+	},
+	showGraphic: function(){
+		var self = this;
+
+		self.container.addClass("c-visual__graphic__show");
+	},
 };
 
 module.exports = function(component){

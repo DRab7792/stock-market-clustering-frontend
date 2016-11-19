@@ -20,7 +20,8 @@ var PaperBase = {
 	    	overCitation: false,
 	    	overTooltip: false,
 	    	tooltipEntry: null,
-	    	tooltipLoc: null
+	    	tooltipLoc: null,
+	    	viewableVisuals: []
 	    };
 	},
 	getLatex: function(callback){
@@ -169,6 +170,11 @@ var PaperBase = {
 				return console.log("Error getting options", err);
 			}
 
+			//Sort visuals by order
+			res.models = _.sortBy(res.models, function(cur){
+				return parseInt(cur.get("meta").loc.order);
+			});
+
 			self.setState({
 				visuals: res,
 			}, callbackIn);
@@ -209,6 +215,28 @@ var PaperBase = {
 		window.setTimeout(function(){
 			self.scrollToSection();
 		}, 300);
+
+		$(".p-wrapper").scroll(function(){
+			var top = $(this).scrollTop(),
+				bottom = top + $(this).height();
+
+			var visibleVisuals = self.state.viewableVisuals;
+			$(".c-visual").each(function(){
+				var curTop = $(this).position().top + top,
+					curBottom = curTop + $(this).height();
+
+				console.log("Tops: " + top + ", " + curTop);
+				console.log("Bottoms: " + bottom + ", " + curBottom);
+				if (top < curTop && bottom > curBottom){
+					visibleVisuals.push(parseInt($(this).attr("id")));
+				}
+			});
+			visibleVisuals = _.uniq(visibleVisuals);
+
+			self.setState({
+				viewableVisuals: visibleVisuals
+			});
+		});
 		
 	},
 	componentDidUpdate: function(prevProps, prevState) {
@@ -244,8 +272,14 @@ var PaperBase = {
 							height: size.height + "px"
 						};
 
+						var visualClasses = "c-visual__graphic ";
+
+						if (_.contains(self.state.viewableVisuals, id)){
+							visualClasses += " c-visual__graphic__show";
+						}
+
 						visuals.push(<div className="c-visual" id={id} style={containerStyle}>
-							<svg className="c-visual__graphic" style={svgStyle}></svg>
+							<svg className={visualClasses} style={svgStyle}></svg>
 							<div className="c-visual__caption">
 								<span className="c-visual__caption-figure">{"Figure " + figure + ". "}</span>
 								<span className="c-visual__caption-text">{caption}</span>
