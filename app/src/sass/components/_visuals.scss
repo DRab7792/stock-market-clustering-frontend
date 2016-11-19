@@ -3,6 +3,21 @@ $legend-fade: 0.3;
 .c-visual{
 	display: block;
 	margin: 20px auto;
+
+	&__graphic{
+		width: 100%;
+	}
+
+	&__caption{
+		display: block;
+		margin-bottom: 20px;
+		font-size: $base-font-size;
+		font-family: $body-font;
+
+		&-figure{
+			font-weight: bold;
+		}
+	}
 }
 
 .c-histogram, .c-stockPrices{
@@ -26,6 +41,11 @@ $legend-fade: 0.3;
 		&-label{
 			font-size: $larger-font-size;
 			font-family: $body-font;
+		}
+
+		&__x-zero{
+			stroke: $color-light-gray;
+			stroke-width: 1px;
 		}
 	}
 }
@@ -94,6 +114,10 @@ $legend-fade: 0.3;
 	&__line{
 		stroke-width: 1px;
 		fill: rgba(0,0,0,0);
+
+		&__bold{
+			stroke-width: 5px;
+		}
 
 		&__faded{
 			opacity: $legend-fade;

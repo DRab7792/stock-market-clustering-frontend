@@ -2,15 +2,17 @@ var _ = require("underscore"),
 	async = require("async"),
 	d3 = require("d3"),
 	moment = require("moment"),
+	config = require('../../config'),
 	scale = require("d3-scale"),
 	axis = require("d3-axis");
 
-var stockPrices = {
+var lineChart = {
 	classPrefix: "c-stockPrices",
 	data: {
 		sectors: [],
 		lines: [],
-		maxPrice: 0,
+		maxY: 0,
+		minY: 1000,
 		colors: ["#F15A5A", "#F0C419", "#4EBA6F", "#2D95BF", "#955BA5"],
 		legend: [],
 		startDate: moment(),
@@ -79,7 +81,14 @@ var stockPrices = {
 	prepareData: function(){
 		var self = this;
 		
-		var lines = [], i = 0;
+		var lines = [], i = 0, func = "average";
+
+		if (
+			self.options.props && 
+			self.options.props.get("meta") &&
+			self.options.props.get("meta").data && 
+			self.options.props.get("meta").data.function
+		) func = self.options.props.get("meta").data.function;
 		
 		//Get the frequencies of all the companies by category
 		_.each(self.data.sectors, function(curSector){
@@ -99,18 +108,34 @@ var stockPrices = {
 				}
 
 				//Form lines
-				_.each(curComp.get("stockPrices").models, function(curPrice){
-					var avg = curPrice.getAverage(),
-						date = moment(curPrice.get("date"), "YYYY-MM-DD");
+				curComp.get("stockPrices").models.forEach(function(curPrice, i){
+					var yVal,
+						date = curPrice.get("date");
+
+					if (func === "average"){
+						yVal = curPrice.get("average");
+					}else if (func === "stdDeviation"){
+						yVal = curPrice.get("stdDeviations");
+					}else if (func === "smooth"){
+						yVal = curPrice.get("smoothedStdDeviations");
+						if (i < config.app.movingAvgWindow) return;
+					}else{
+						yVal = 0;
+					}
 
 					var point = {
 						date: date,
-						price: avg
+						price: yVal
 					};
 
-					//Calculate the max price
-					if (avg > self.data.maxPrice){
-						self.data.maxPrice = avg;
+					//Calculate the max y val
+					if (yVal > self.data.maxY){
+						self.data.maxY = yVal;
+					}
+
+					//Calculate the min y val
+					if (yVal < self.data.minY){
+						self.data.minY = yVal;
 					}
 
 					//Calculate the start date
@@ -162,13 +187,10 @@ var stockPrices = {
 
 		//Get the container
 		var visualId = self.options.props.get("wpid");
-		var container = $(".c-visual#" + visualId);
+		var container = $(".c-visual#" + visualId + " .c-visual__graphic");
 		
 		//Append the svg tag
-		var svg = d3.select(container[0])
-			.append("svg")
-			.attr("width", "100%")
-			.attr("height", "100%");
+		var svg = d3.select(container[0]);
 
 		//Get pixel dimensions
 		var dimensions = svg.node().getBoundingClientRect();
@@ -188,7 +210,7 @@ var stockPrices = {
 			.domain([self.data.startDate, self.data.endDate])
 			.range([minX, maxX]);
 		var yScale = d3.scaleLinear()
-			.domain([0, self.data.maxPrice])
+			.domain([self.data.minY, self.data.maxY])
 			.range([(height - margin.bottom), margin.top]);
 
 		//Set up and draw the axes
@@ -205,6 +227,15 @@ var stockPrices = {
 			.attr("class", self.classPrefix+"__axis "+self.classPrefix+"__axis__x")
 			.attr("transform", "translate(0," + (height - margin.bottom) + ")")
 			.call(xAxis);
+
+		if (self.data.minY !== 0){
+			svg.append("line")
+				.attr("x1", function(){ return xScale(self.data.startDate) + 1; })
+				.attr("x2", function(){ return xScale(self.data.endDate); })
+				.attr("y1", function(){ return yScale(0); })
+				.attr("y2", function(){ return yScale(0); })
+				.attr("class", self.classPrefix+"__axis__x-zero");
+		}
 
 		svg.selectAll("." + self.classPrefix + "__axis__x text")
 			.attr("transform", function(d){
@@ -228,7 +259,7 @@ var stockPrices = {
 			.attr("class", self.classPrefix + "__lines");
 			// .attr("transform", "translate(-" + margin.left + ",0)");
 
-		var i = 0;
+		var i = 0, lineNum = 0;
 		_.each(self.data.lines, function(curGroup){
 
 			var line = d3.line()
@@ -253,11 +284,19 @@ var stockPrices = {
 						var str = self.classPrefix + "__line ";
 						return str;
 					})
+					.attr("id", function(){ return "line" + lineNum; })
 					.attr("d", line)
 					.attr("stroke", function(d){
 						return cur.color;
+					})
+					.on("mouseover", function(){
+						self.lineHover.bind(this)();
+					})
+					.on("mouseout", function(){
+						self.lineBlur.bind(this)();
 					});
 
+				lineNum++;
 			});
 
 			i++;
@@ -351,9 +390,17 @@ var stockPrices = {
 		lineGroup.classed(self.classPrefix + "__group__faded", !isFaded);
 		color.classed(self.classPrefix + "__legend-color__faded", !isFaded);
 		label.classed(self.classPrefix + "__legend-label__faded", !isFaded);
+	},
+	lineHover: function(d, i){
+		//Bold the line
+		d3.select(this).classed(self.classPrefix + "__line__bold", true);
+	},
+	lineBlur: function(d, i){
+		//Unbold the line
+		d3.select(this).classed(self.classPrefix + "__line__bold", false);
 	}
 };
 
 module.exports = function(component){
-	component.stockPrices = stockPrices;
+	component.lineChart = lineChart;
 };

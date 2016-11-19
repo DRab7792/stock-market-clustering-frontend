@@ -1,5 +1,6 @@
 var Backbone = require('backbone'),
-	_ = require('underscore');
+	_ = require('underscore'),
+    moment = require('moment');
 
 var Price = Backbone.Model.extend({
 	defaults:{
@@ -21,7 +22,7 @@ var Price = Backbone.Model.extend({
 
     	props.symbol = (data.Symbol) ? data.Symbol : '';   
 
-    	props.date = (data.Date) ? data.Date : '';   
+    	props.date = (data.Date) ? moment(data.Date, "YYYY-MM-DD") : '';   
 
     	props.open = (data.Open) ? parseFloat(data.Open) : 0;
 
@@ -35,17 +36,21 @@ var Price = Backbone.Model.extend({
 
 		self.attributes = props;   	
 
+        self.getAverage();
+
     	return self;
     },
 
     getAverage: function(){
-    	var self = this;
+    	var self = this, average = 0;
 
     	if (self.get("high") && self.get("low")){
-    		return (self.get("high") + self.get("low")) / 2;
-    	}else{
-    		return null;
+    		average = (self.get("high") + self.get("low")) / 2;
     	}
+
+        self.set("average", average);
+
+        return average;
     },
 
     getStdDeviations: function(mean, stdDev){
@@ -55,7 +60,18 @@ var Price = Backbone.Model.extend({
 
         var diff = mean - avg;
 
-        return diff / stdDev;
+        var stdDevs = (diff / stdDev);
+
+        self.set("stdDeviations", stdDevs);
+
+        return stdDevs;
+    },
+    setSmoothedStdDeviations: function(smoothedVal){
+        var self = this;
+
+        self.set("smoothedStdDeviations", smoothedVal);
+
+        return smoothedVal;
     }
 });
 

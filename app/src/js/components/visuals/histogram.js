@@ -93,13 +93,10 @@ var histogram = {
 
 		//Get the container
 		var visualId = self.options.props.get("wpid");
-		var container = $(".c-visual#" + visualId);
+		var container = $(".c-visual#" + visualId + " .c-visual__graphic");
 		
 		//Append the svg tag
-		var svg = d3.select(container[0])
-			.append("svg")
-			.attr("width", "100%")
-			.attr("height", "100%");
+		var svg = d3.select(container[0]);
 
 		//Get pixel dimensions
 		var dimensions = svg.node().getBoundingClientRect();

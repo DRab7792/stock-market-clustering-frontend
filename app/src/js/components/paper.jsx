@@ -16,6 +16,7 @@ var PaperBase = {
 	    return { 
 	    	latex: null,
 	    	visuals: null,
+	    	visualControllers: [],
 	    	overCitation: false,
 	    	overTooltip: false,
 	    	tooltipEntry: null,
@@ -178,18 +179,29 @@ var PaperBase = {
 
 		self.getLatex();
 		self.getVisuals(function(){
+			var controllers = [];
+
 			//Initiate the visuals
 			_.each(self.state.visuals.models, function(cur){
 				var loc = cur.get("meta").loc;
 				if (loc.page === self.props.source){
-					var type = cur.get("meta").data.type;
+					var type = cur.get("meta").data.type,
+						id = cur.get("wpid");
+					
+					var visualController = deepCopy(self.visuals[type]);
 
-					// console.log(self);
-					self.visuals[type].initiate({
+					visualController.initiate({
 						props: cur,
 						actionHandler: self.props.actionHandler
 					});
+
+					controllers.push(visualController);
 				}
+			});
+
+			//Save the controllers
+			self.setState({
+				visualControllers: controllers
 			});
 		});
 
@@ -211,7 +223,7 @@ var PaperBase = {
 
 		var res = _.map(paragraphs, function(curContent){
 			curContent = self.formatContent(curContent);
-			var visual = null;
+			var visuals = [];
 
 			//Should any visualizations be inserted?
 			if (
@@ -221,21 +233,31 @@ var PaperBase = {
 				_.each(self.state.visuals.models, function(cur){
 					var loc = cur.get("meta").loc, 
 						size = cur.get("meta").size,
-						id = cur.get("wpid");
+						id = cur.get("wpid"),
+						figure = cur.get("meta").misc.figure,
+						caption = cur.get("meta").misc.caption;
 					if (loc.page === self.props.source && curSection === loc.section && curParagraph === parseInt(loc.paragraph)){
-						var styles = {
-							width: size.width + "%",
+						var containerStyle = {
+							width: size.width + "%"
+						};
+						var svgStyle = {
 							height: size.height + "px"
 						};
 
-						visual = <div className="c-visual" id={id} style={styles}></div>;
+						visuals.push(<div className="c-visual" id={id} style={containerStyle}>
+							<svg className="c-visual__graphic" style={svgStyle}></svg>
+							<div className="c-visual__caption">
+								<span className="c-visual__caption-figure">{"Figure " + figure + ". "}</span>
+								<span className="c-visual__caption-text">{caption}</span>
+							</div>
+						</div>);
 					}
 				});
 			}
 
 			curParagraph++;
 			return <div>
-				{visual}
+				{visuals}
 				<p className="p-paper__paragraph">
 					{curContent}
 				</p>
