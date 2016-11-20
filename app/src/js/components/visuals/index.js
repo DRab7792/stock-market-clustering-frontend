@@ -3,5 +3,4 @@ module.exports = function(component){
 
 	require('./histogram.js')(component.visuals);
 	require('./lineChart.js')(component.visuals);
-	require('./varianceChart.js')(component.visuals);
 };

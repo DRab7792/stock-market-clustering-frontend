@@ -98,13 +98,13 @@ var lineChart = {
 			});
 		});
 	},
-	prepareVarianceData: function(){
+	prepareRangeData: function(){
 		var self = this;
 
 		var lines = [];
 
 		self.data.sectors.forEach(function(curSector, i){
-			var curSectorLabel = curSector.models[0].get("category").sector;
+			var curSectorLabel = curSector.name;
 			var sectorLines = [];
 			var curLine = {
 				sector: curSectorLabel,
@@ -152,7 +152,7 @@ var lineChart = {
 
 		//Form the legend data
 		self.data.sectors.forEach(function(curSector, i){
-			var curSectorLabel = curSector.models[0].get("category").sector;
+			var curSectorLabel = curSector.name;
 			var color = self.data.colors[i];
 			self.data.legend.push({
 				color: color,
@@ -167,14 +167,14 @@ var lineChart = {
 		
 		var lines = [], func = self.data.function;
 		
-		if (func === "variances"){
-			self.prepareVarianceData();
+		if (func === "ranges"){
+			self.prepareRangeData();
 			return;
 		}
 
 		//Get the frequencies of all the companies by category
 		self.data.sectors.forEach(function(curSector, i){
-			var curSectorLabel = curSector.models[0].get("category").sector;
+			var curSectorLabel = curSector.name;
 			var sectorLines = [];
 
 			//Iterate through the sector's companies
@@ -246,7 +246,7 @@ var lineChart = {
 
 		//Form the legend data
 		self.data.sectors.forEach(function(curSector, i){
-			var curSectorLabel = curSector.models[0].get("category").sector;
+			var curSectorLabel = curSector.name;
 			var color = self.data.colors[i];
 			self.data.legend.push({
 				color: color,

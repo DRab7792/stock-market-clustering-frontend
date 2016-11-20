@@ -10,10 +10,23 @@ var Company = Backbone.Model.extend({
 		category: {},
 		attributes: {},
 		clearbit_id: null,
-		stockPrices: []
+		stockPrices: [],
+		state: null,
+		preppedAttributes: {},
+		distances: [],
+		cluster: {
+			isCenter: false,
+			distFromCenter: 0
+		}	
 	},
-
+	states: {
+		EMPTY: 0,
+		LOADED: 1,
+		PREPPED: 2,
+		CLUSTERED: 3,
+	},
 	initialize: function(options){
+		this.set("state", this.states.EMPTY);
         this.options = options || {};
     },
 
@@ -38,7 +51,42 @@ var Company = Backbone.Model.extend({
 
 		self.attributes = props;   	
 
+		this.set("state", this.states.LOADED);
+
     	return self;
+    },
+    getMostRecentAttributes: function(){
+    	var self = this, attributes = self.get("attributes");
+
+    	var adjAttributes = {}, years = ["2016", "2015", "2014", "2013", "2012", "2011", "2010"];
+
+    	_.each(Object.keys(attributes), function(curLabel){
+    		var cur = attributes[curLabel], recent = null;
+
+    		_.each(years, function(curYear){
+    			if (!recent && cur[curYear]){
+    				recent = cur[curYear];
+    				return false;
+    			}
+    		});
+
+    		adjAttributes[curLabel] = recent;
+    	});
+
+    	self.set("preppedAttributes", adjAttributes);
+    },
+    prepAttributes: function(means){
+    	var self = this, attributes = self.get("preppedAttributes");
+
+    	_.each(Object.keys(means), function(curLabel){
+    		if (!attributes[curLabel]){
+    			attributes[curLabel] = means[curLabel];
+    		}
+    	});
+
+    	self.set("preppedAttributes", attributes);
+
+    	self.set("state", self.states.PREPPED);
     }
 });
 

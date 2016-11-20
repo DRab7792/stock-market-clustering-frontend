@@ -1,8 +1,11 @@
 var CompanyCollection = require('../collections/companies'),
 	request = require('request'),
 	async = require('async'),
+	config = require('../config'),
 	_ = require("underscore"),
 	company = require('../models/company');
+
+var MAX_VAL = 999999999999;
 
 var DataController = function(options){
 	this.app = options.app;	
@@ -17,6 +20,15 @@ DataController.prototype.initialLoad = function(callback){
 	async.series([
 		function(done){
 			self.loadCompanies(function(err){
+				return done(err);
+			});
+		},
+		//Test clustering
+		function(done){
+			self.calcClusters({
+				clusters: 6
+			}, function(err, data){
+				console.log(data);
 				return done(err);
 			});
 		}
@@ -85,6 +97,10 @@ DataController.prototype.getCompaniesBySectors = function(options, callback){
 			}
 		});
 
+		curSector.state = curSector.states.LOADED;
+
+		curSector.name = curSector.models[0].get("category").sector;
+
 		sectors.push(curSector);
 
 		return done();
@@ -101,8 +117,9 @@ DataController.prototype.getCompaniesBySectors = function(options, callback){
 
 //Calculate all data in order if necessary
 DataController.prototype.calculateData = function(options, callback){
+	var callbackIn = callback ? callback : function(){};
 	if (!options.func || !options.sectors){
-		return callback("Missing function");
+		return callbackIn("Missing function");
 	}
 
 	var sectors = options.sectors, func = options.func;
@@ -140,7 +157,7 @@ DataController.prototype.calculateData = function(options, callback){
 				checkSmoothDevs(curComp);
 			});
 		});
-	}else if (func === "variances"){
+	}else if (func === "ranges"){
 		_.each(sectors, function(curSector){
 			_.each(curSector.models, function(curComp){
 				checkStandardDevs(curComp);
@@ -152,7 +169,164 @@ DataController.prototype.calculateData = function(options, callback){
 		});
 	}
 
-	return callback(null, sectors);
+	return callbackIn(null, sectors);
+}
+
+
+DataController.prototype.calcFeature = function(a, b, feature){
+	var aVal = a.get("preppedAttributes")[feature],
+		bVal = b.get("preppedAttributes")[feature];
+
+	//Divide by 10 million to normalize the data
+	if (aVal) aVal = (aVal / 10000000).toFixed(3);
+	if (bVal) bVal = (bVal / 10000000).toFixed(3);
+
+	if (aVal && bVal){
+		return Math.abs(aVal - bVal);
+	}else if (aVal && !bVal){
+		return Math.abs(aVal);
+	}else if (!aVal && bVal){
+		return Math.abs(bVal);
+	}else{
+		return 0;
+	}
+}
+
+DataController.prototype.calcDistance = function(center, comp){
+	var self = this, sum = 0;
+
+	var compFeatures = Object.keys(comp.get("preppedAttributes")),
+		centerFeatures = Object.keys(center.get("preppedAttributes"));
+
+	var features = _.intersection(compFeatures, centerFeatures);
+
+	_.each(features, function(feature){
+		var diff = self.calcFeature(center, comp, feature);
+		sum += Math.pow(diff, 2);
+	})
+
+	return Math.sqrt(sum);
+}
+
+DataController.prototype.assignCompaniesToClusters = function(clusters, companies){
+	var self = this, totalDist = 0;
+
+	_.each(companies, function(curComp){
+		var distances = [];
+
+		//Calc distances
+		_.each(clusters, function(curCluster){
+			distances.push(self.calcDistance(curCluster.center, curComp));
+		});
+
+		//Now pick the minimum distance and assign the company to that cluster
+		var minCluster = null, minDist = MAX_VAL;
+		clusters.forEach(function(curCluster, i){
+			if (distances[i] < minDist){
+				minCluster = curCluster;
+				minDist = distances[i];
+			}
+		});
+
+		//Update total distance
+		totalDist += minDist;
+
+		//Assign the company to the cluster
+		minCluster.add(curComp);
+	});
+
+	return totalDist;
+};
+
+//Perform the clustering
+DataController.prototype.calcClusters = function(options, callback){
+	var self = this;
+	var callbackIn = callback ? callback : function(){};
+	//Check the parameters and the data
+	if (!options.clusters || options.clusters > 10 || options.clusters < 0){
+		return callbackIn("Missing k value");
+	}
+
+	if (!self.companies){
+		return callbackIn("No companies loaded");
+	}
+
+	//Prepare all the attributes for each company
+	self.companies.prepCompanyAttributes();
+
+	//Start clustering the companies
+	var allCompanies = self.companies.models,
+		initialDist = MAX_VAL,
+		totalDist = 0,
+		firstPass = true,
+		history = [];
+
+	while (totalDist < initialDist){
+		//Update the distances
+		if (!firstPass){
+			initialDist = totalDist;
+			totalDist = 0;
+		}
+
+		//No longer a first pass
+		if (config.app.debug) console.log("Initial Distance", initialDist);
+		if (firstPass) firstPass = false;
+
+		//Clear clusters and shuffle the companies
+		var clusters = [];
+		allCompanies = _.shuffle(allCompanies);
+
+		//Create clusters and assign a center
+		for (var i = 0; i < options.clusters; i++) {
+			var newCluster = new CompanyCollection();
+			newCluster.id = i;
+			newCluster.center = allCompanies[i];
+			clusters.push(newCluster);
+		}
+
+		//Assign companies to each cluster
+		totalDist = self.assignCompaniesToClusters(clusters, allCompanies, totalDist);
+
+		//Remember these clusters and distance
+		var iteration = {
+			clusters: clusters,
+			distance: totalDist
+		};
+
+		history.push(iteration);
+
+		if (config.app.debug){
+			console.log("Total Distance", totalDist);
+		}
+	}
+
+	//Save the best configuration
+	if (config.app.debug){
+		console.log("History", history);
+	}
+
+	var bestClusters = history[(history.length - 2)];
+
+	//Assign a cluster to each company
+	_.each(bestClusters.clusters, function(curCluster){
+		var center = curCluster.center;
+
+		_.each(curCluster.models, function(curComp){
+			var cur = {};
+			if (curComp.get("id") === center.get("id")){
+				cur.isCenter = true;
+				cur.distFromCenter = 0;
+			}else{
+				cur.isCenter = false;
+				cur.distFromCenter = self.calcDistance(center, curComp);
+			}
+			curComp.set("cluster", cur);
+
+			curComp.set("state", curComp.states.CLUSTERED);
+		});
+	});
+
+	return callbackIn(null, bestClusters);
 }
 
 module.exports = DataController;

@@ -14,7 +14,8 @@ config.app = {
 		"#4EBA6F", 
 		"#2D95BF", 
 		"#955BA5"
-	]
+	],
+	debug: true
 };
 
 

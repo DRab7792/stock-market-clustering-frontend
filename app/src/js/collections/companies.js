@@ -11,9 +11,12 @@ var companies = Backbone.Collection.extend({
 		LOADED: 1,
 		RANGES: 2
 	},
+	name: '',
 	variances: [],
 	ranges: {},
 	state: null,
+	center: null,
+	id: null,
 	model: function(){
 		return Company;
 	},
@@ -32,6 +35,7 @@ var companies = Backbone.Collection.extend({
 			return filename;
 		});
 
+		//Get the json files
 		async.each(modules, function(cur, done){
 			$.ajax({
 				url: cur,
@@ -64,6 +68,7 @@ var companies = Backbone.Collection.extend({
 	getStdDevVariances: function(){
 		var self = this;
 
+		//Get all the dates
 		var dates = _.map(self.models[0].get("stockPrices").models, function(cur){
 			return cur.get("date");
 		});
@@ -96,6 +101,45 @@ var companies = Backbone.Collection.extend({
 		self.state = self.states.RANGES;
 
 		return self.ranges;
+	},
+	prepCompanyAttributes: function(){
+		var self = this;
+
+		//Get the most recent attribute for all companies
+		_.each(self.models, function(curComp){
+			curComp.getMostRecentAttributes();
+		});
+
+		//Get the mean value for each attribute
+		var means = {}, nums = {};
+		_.each(self.models, function(curComp){
+			var curAttributes = curComp.get("preppedAttributes");
+
+			_.each(Object.keys(curAttributes), function(curLabel){
+				var curVal = curAttributes[curLabel];
+
+				//Update number of vals for each attribute
+				if (nums[curLabel]){
+					nums[curLabel]++;	
+				}else{
+					nums[curLabel] = 1;
+				}
+				
+
+				//Keep rolling mean update
+				if (!means[curLabel]){
+					means[curLabel] = curVal;
+				}else{
+					means[curLabel] = (means[curLabel] * (nums[curLabel] - 1) / nums[curLabel]) + (curVal / nums[curLabel]);
+					
+				}
+			});
+		});
+
+		//Send the means to the companies for those with missing attributes
+		_.each(self.models, function(curComp){
+			curComp.prepAttributes(means);
+		});
 	}
 });
 
