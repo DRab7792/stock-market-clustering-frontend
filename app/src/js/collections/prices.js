@@ -5,9 +5,18 @@ var Backbone = require('backbone'),
 	_ = require('underscore');
 
 var prices = Backbone.Collection.extend({
+	states: {
+		EMPTY: 0,
+		LOADED: 1,
+		STANDARDDEVS: 2,
+		SMOOTH: 3
+	},
 	mean: 0,
 	stdDeviation: 0,
+	dates: {},
+	state: null,
 	model: function(){
+		this.state = this.states.EMPTY;
 		return new Price();
 	},
 	initialize: function(options){
@@ -40,6 +49,8 @@ var prices = Backbone.Collection.extend({
 		//Sort prices by date
 		self.sort();
 
+		self.state = self.states.LOADED;
+
 		return self;
 	},
 	calculateStandardDeviations: function(){
@@ -51,6 +62,8 @@ var prices = Backbone.Collection.extend({
 		_.each(self.models, function(cur){
 			cur.getStdDeviations(self.mean, self.stdDeviation);
 		});
+
+		self.state = self.states.STANDARDDEVS;
 	},
 	getStdDeviation: function(){
 		var self = this;
@@ -86,6 +99,7 @@ var prices = Backbone.Collection.extend({
 		var avgWindow = config.app.movingAvgWindow;
 
 		//Start the calculations
+		var dates = {};
 		self.models.forEach(function(cur, i){
 			//Before day 10
 			if (i < avgWindow){
@@ -101,8 +115,16 @@ var prices = Backbone.Collection.extend({
 			}
 			var mean = sum / vals;
 
+			//Mark smoothed standard deviations by date
+			
+			dates[cur.get("date").format("YYYY-MM-DD")] = mean;
+			
+
 			cur.setSmoothedStdDeviations(mean);
 		});
+		self.dates = dates;
+
+		self.state = self.states.SMOOTH;
 	}
 });
 

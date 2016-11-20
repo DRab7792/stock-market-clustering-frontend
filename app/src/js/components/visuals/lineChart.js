@@ -82,34 +82,101 @@ var lineChart = {
 				return console.log("Error getting companies", err);
 			}
 
-			if (self.data.function === "stdDeviation"){
-				_.each(res, function(curSector){
-					_.each(curSector.models, function(curComp){
-						if (curComp.get("stockPrices")) curComp.get("stockPrices").calculateStandardDeviations();
-					});
-				});
-			}else if (self.data.function === "smooth"){
-				_.each(res, function(curSector){
-					_.each(curSector.models, function(curComp){
-						if (curComp.get("stockPrices")) curComp.get("stockPrices").getMovingMean();
-					});
-				});
-			}
+			self.options.actionHandler({
+				controller: "data",
+	    		method: "calculateData",
+			}, {
+				func: self.data.function,
+				sectors: res
+			}, function(err, res){
+				if (err){
+					return console.log("Error calculating data", err);
+				}
 
-			self.data.sectors = res;
-			return callback();
+				self.data.sectors = res;
+				return callback();
+			});
 		});
+	},
+	prepareVarianceData: function(){
+		var self = this;
+
+		var lines = [];
+
+		self.data.sectors.forEach(function(curSector, i){
+			var curSectorLabel = curSector.models[0].get("category").sector;
+			var sectorLines = [];
+			var curLine = {
+				sector: curSectorLabel,
+				color: self.data.colors[i],
+				points: []
+			};
+
+			_.each(Object.keys(curSector.ranges), function(curDate){
+				var yVal = curSector.ranges[curDate];
+
+				var momentDate = moment(curDate, "YYYY-MM-DD");
+
+				var point = {
+					date: momentDate,
+					yVal: yVal
+				};
+
+				//Calculate the max y val
+				if (yVal > self.data.maxY){
+					self.data.maxY = yVal;
+				}
+
+				//Calculate the min y val
+				if (yVal < self.data.minY){
+					self.data.minY = yVal;
+				}
+
+				//Calculate the start date
+				if (momentDate.isBefore(self.data.startDate)){
+					self.data.startDate = moment(momentDate);
+				}
+
+				//Calculate the end date
+				if (momentDate.isAfter(self.data.endDate)){
+					self.data.endDate = moment(momentDate);
+				}
+
+				curLine.points.push(point);
+			});
+
+			sectorLines.push(curLine);
+
+			lines.push(sectorLines);
+		});
+
+		//Form the legend data
+		self.data.sectors.forEach(function(curSector, i){
+			var curSectorLabel = curSector.models[0].get("category").sector;
+			var color = self.data.colors[i];
+			self.data.legend.push({
+				color: color,
+				label: curSectorLabel
+			});
+		});
+
+		self.data.lines = lines;
 	},
 	prepareData: function(){
 		var self = this;
 		
-		var lines = [], i = 0, func = self.data.function;
+		var lines = [], func = self.data.function;
 		
+		if (func === "variances"){
+			self.prepareVarianceData();
+			return;
+		}
+
 		//Get the frequencies of all the companies by category
-		_.each(self.data.sectors, function(curSector){
+		self.data.sectors.forEach(function(curSector, i){
 			var curSectorLabel = curSector.models[0].get("category").sector;
 			var sectorLines = [];
-			
+
 			//Iterate through the sector's companies
 			_.each(curSector.models, function(curComp){
 				var curLine = {
@@ -141,7 +208,7 @@ var lineChart = {
 
 					var point = {
 						date: date,
-						price: yVal
+						yVal: yVal
 					};
 
 					//Calculate the max y val
@@ -171,9 +238,9 @@ var lineChart = {
 			});
 
 			lines.push(sectorLines);
-			i++;
 		});
 
+		//Pad the x axis
 		self.data.startDate.subtract(10, 'days');
 		self.data.endDate.add(10, 'days');
 
@@ -216,7 +283,6 @@ var lineChart = {
 		//Set up the scales
 		var margin = {top: 50, right: 100, bottom: 80, left: 60};
 
-		// console.log(self.data.lines);
 		var dates = self.data.lines[0][0].points.length;
 		var minX = margin.left;
 		var maxX = width - margin.right;
@@ -244,7 +310,7 @@ var lineChart = {
 			.attr("transform", "translate(0," + (height - margin.bottom) + ")")
 			.call(xAxis);
 
-		if (self.data.minY !== 0){
+		if (self.data.minY < 0){
 			svg.append("line")
 				.attr("x1", function(){ return xScale(self.data.startDate) + 1; })
 				.attr("x2", function(){ return xScale(self.data.endDate); })
@@ -286,7 +352,7 @@ var lineChart = {
 					var date = new Date(d.date.format());
 					return xScale(date); 
 				})
-				.y(function(d){ return yScale(d.price); });
+				.y(function(d){ return yScale(d.yVal); });
 
 			var lineGroup = lineContainer.append("g")
 				.attr("class", self.classPrefix + "__group")
@@ -307,7 +373,7 @@ var lineChart = {
 					})
 					.on("mouseover", function(){
 						// console.log(this);
-						console.log("Company", cur.companyName);
+						if (cur.companyName) console.log("Company", cur.companyName);
 						// d3.select(this).attr("class", self.classPrefix + "__line " + self.classPrefix + "__line__bold");
 					})
 					.on("mouseout", function(){

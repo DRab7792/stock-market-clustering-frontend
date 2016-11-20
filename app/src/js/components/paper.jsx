@@ -225,8 +225,8 @@ var PaperBase = {
 				var curTop = $(this).position().top + top,
 					curBottom = curTop + $(this).height();
 
-				console.log("Tops: " + top + ", " + curTop);
-				console.log("Bottoms: " + bottom + ", " + curBottom);
+				// console.log("Tops: " + top + ", " + curTop);
+				// console.log("Bottoms: " + bottom + ", " + curBottom);
 				if (top < curTop && bottom > curBottom){
 					visibleVisuals.push(parseInt($(this).attr("id")));
 				}
