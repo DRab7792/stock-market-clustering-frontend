@@ -23,15 +23,6 @@ DataController.prototype.initialLoad = function(callback){
 				return done(err);
 			});
 		},
-		//Test clustering
-		function(done){
-			self.calcClusters({
-				clusters: 6
-			}, function(err, data){
-				console.log(data);
-				return done(err);
-			});
-		}
 	], function(err){
 		if (err){
 			console.log("Error loading wordpress pages", err);
@@ -242,6 +233,7 @@ DataController.prototype.assignCompaniesToClusters = function(clusters, companie
 DataController.prototype.calcClusters = function(options, callback){
 	var self = this;
 	var callbackIn = callback ? callback : function(){};
+	
 	//Check the parameters and the data
 	if (!options.clusters || options.clusters > 10 || options.clusters < 0){
 		return callbackIn("Missing k value");

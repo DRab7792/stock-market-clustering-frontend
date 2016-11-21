@@ -28,7 +28,7 @@ $legend-fade: 0.3;
 	}
 }
 
-.c-histogram, .c-lineChart{
+.c-histogram, .c-lineChart, .c-clusters{
 
 	&__title{
 		font-family: $headers-font;
@@ -129,6 +129,53 @@ $legend-fade: 0.3;
 
 		&__faded{
 			opacity: $legend-fade;
+		}
+	}
+}
+
+.c-clusters{
+	&__margin{
+		fill: $color-background;
+	}
+
+	&__info{
+		font-family: $body-font;
+		font-size: $base-font-size;
+
+		&-company{
+			font-weight: bold;
+			font-size: $larger-font-size;
+		}
+	}
+
+	&__legend{
+		font-family: $body-font;
+		font-size: $base-font-size;
+
+		&-node{
+			stroke: $color-darker-gray;
+			stroke-width: 2px;
+			fill: $color-background;
+		}
+	}
+
+	&__edge{
+		stroke: $color-darker-gray;
+		stroke-width: 1px;
+
+		&__dash{
+			stroke-dasharray: 5, 5;
+		}
+
+		&__double-dash{
+			stroke-dasharray: 2, 10;
+		}
+	}
+
+	&__node{
+		&__center{
+			stroke: $color-darker-gray;
+			stroke-width: 2px;
 		}
 	}
 }

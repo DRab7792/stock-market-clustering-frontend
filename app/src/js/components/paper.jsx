@@ -21,7 +21,8 @@ var PaperBase = {
 	    	overTooltip: false,
 	    	tooltipEntry: null,
 	    	tooltipLoc: null,
-	    	viewableVisuals: []
+	    	viewableVisuals: [],
+	    	initialScroll: true
 	    };
 	},
 	getLatex: function(callback){
@@ -62,7 +63,9 @@ var PaperBase = {
 		//Scroll to section
 		$(".p-wrapper").animate({
 			scrollTop: scroll
-		}, 300);
+		}, 300, function(){
+			if (self.state.initialScroll) self.setState({ initialScroll: false });
+		});
 	},
 	outCitation: function(){
 		this.setState({ overCitation: false });
@@ -217,6 +220,8 @@ var PaperBase = {
 		}, 300);
 
 		$(".p-wrapper").scroll(function(){
+			if (self.state.initialScroll) return;
+
 			var top = $(this).scrollTop(),
 				bottom = top + $(this).height();
 

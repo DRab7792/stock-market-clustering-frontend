@@ -72,7 +72,7 @@ var lineChart = {
 		var sectors = self.options.props.get("meta").data.sectors;
 
 		//Call the data controller	
-		this.options.actionHandler({
+		self.options.actionHandler({
 	    	controller: "data",
 	    	method: "getCompaniesBySectors",
 	    }, {
