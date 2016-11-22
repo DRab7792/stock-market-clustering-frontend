@@ -10,9 +10,10 @@ var MAX_VAL = 999999999999;
 var DataController = function(options){
 	this.app = options.app;	
 	this.companies = [];
+	this.clusters = null;
 };
 
-DataController.prototype.initialLoad = function(callback){
+DataController.prototype.initialLoad = function(options, callback){
 	var self = this,
 		callbackIn = (callback) ? callback : function(){};
 
@@ -29,7 +30,29 @@ DataController.prototype.initialLoad = function(callback){
 			return callbackIn(err);
 		}
 
-		return callbackIn();
+		//Get number of clusters
+		self.app.actionHandler({
+			controller: "pages",
+	    	method: "wpOptions",
+	    	isVar: true,
+		}, {}, function(err, options){
+			if (err){
+				return console.log("Error getting options from page controller", err);
+			}
+
+			var k = options.data.clusters;
+
+			//Calculate clusters
+			self.calcClusters({
+				clusters: k
+			}, function(err){
+				if (err){
+					return console.log("Error calculating clusters", err);
+				}
+
+				return callbackIn();
+			});
+		});		
 	});
 };
 
@@ -109,11 +132,11 @@ DataController.prototype.getCompaniesBySectors = function(options, callback){
 //Calculate all data in order if necessary
 DataController.prototype.calculateData = function(options, callback){
 	var callbackIn = callback ? callback : function(){};
-	if (!options.func || !options.sectors){
-		return callbackIn("Missing function");
+	if (!options.func || !options.groups){
+		return callbackIn("Missing parameters");
 	}
 
-	var sectors = options.sectors, func = options.func;
+	var groups = options.groups, func = options.func;
 
 	function checkStandardDevs(curComp){
 		if (
@@ -131,36 +154,36 @@ DataController.prototype.calculateData = function(options, callback){
 		}
 	}
 
-	function checkRanges(curSector){
-		if (curSector.state < curSector.states.RANGES) curSector.getStdDevVariances();
+	function checkRanges(curGroup){
+		if (curGroup.state < curGroup.states.RANGES) curGroup.getStdDevVariances();
 	}
 
 	if (func === "stdDeviation"){
-		_.each(sectors, function(curSector){
-			_.each(curSector.models, function(curComp){
+		_.each(groups, function(curGroup){
+			_.each(curGroup.models, function(curComp){
 				checkStandardDevs(curComp);
 			});
 		});
 	}else if (func === "smooth"){
-		_.each(sectors, function(curSector){
-			_.each(curSector.models, function(curComp){
+		_.each(groups, function(curGroup){
+			_.each(curGroup.models, function(curComp){
 				checkStandardDevs(curComp);
 				checkSmoothDevs(curComp);
 			});
 		});
 	}else if (func === "ranges"){
-		_.each(sectors, function(curSector){
-			_.each(curSector.models, function(curComp){
+		_.each(groups, function(curGroup){
+			_.each(curGroup.models, function(curComp){
 				checkStandardDevs(curComp);
 				checkSmoothDevs(curComp);
 			});
 		});
-		_.each(sectors, function(curSector){
-			checkRanges(curSector);
+		_.each(groups, function(curGroup){
+			checkRanges(curGroup);
 		});
 	}
 
-	return callbackIn(null, sectors);
+	return callbackIn(null, groups);
 }
 
 
@@ -300,8 +323,11 @@ DataController.prototype.calcClusters = function(options, callback){
 	var bestClusters = history[(history.length - 2)];
 
 	//Assign a cluster to each company
+	var i = 1;
 	_.each(bestClusters.clusters, function(curCluster){
 		var center = curCluster.center;
+
+		curCluster.name = "Cluster " + i;
 
 		_.each(curCluster.models, function(curComp){
 			var cur = {};
@@ -316,9 +342,23 @@ DataController.prototype.calcClusters = function(options, callback){
 
 			curComp.set("state", curComp.states.CLUSTERED);
 		});
+
+		i++;
 	});
 
+	self.clusters = bestClusters;
 	return callbackIn(null, bestClusters);
 }
+
+DataController.prototype.getClusters = function(options, callback){
+	var self = this;
+	var callbackIn = callback ? callback : function(){};
+
+	if (!self.clusters){
+		return callbackIn("Clusters not set");
+	}
+
+	return callbackIn(null, self.clusters);
+};
 
 module.exports = DataController;

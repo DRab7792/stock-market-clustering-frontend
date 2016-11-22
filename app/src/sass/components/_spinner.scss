@@ -1,0 +1,25 @@
+$spinner-width: 45px;
+
+.c-spinner {
+    width: $spinner-width;
+    top: 30%;
+    left: 50%;
+    margin-left: (-1 * $spinner-width / 2);
+    display: block;
+    position: absolute;
+
+    &__circle {
+        width: $spinner-width;
+        height: $spinner-width;
+        border-radius: 100%;
+        border: 5px solid $color-lighter-gray;
+        border-top-color: $color-primary;
+        animation: spin 1s infinite linear;
+    }
+}
+
+@keyframes spin {
+  100% {
+    transform: rotate(360deg);
+  }
+}

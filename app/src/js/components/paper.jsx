@@ -4,6 +4,7 @@ var React = require('react'),
 	async = require('async'),
 	SectionList = require('./sectionList.jsx'),
 	Source = require('./source.jsx'),
+	Spinner = require('./spinner.jsx'),
 	ReactDOM = require('react-dom'),
 	ReactBackbone = require('react.backbone');
 
@@ -21,6 +22,7 @@ var PaperBase = {
 	    	overTooltip: false,
 	    	tooltipEntry: null,
 	    	tooltipLoc: null,
+	    	loading: true,
 	    	viewableVisuals: [],
 	    	initialScroll: true
 	    };
@@ -183,9 +185,33 @@ var PaperBase = {
 			}, callbackIn);
 		});
 	},
-	componentDidMount: function() {
+	loadData: function(){
 		var self = this;
 
+		self.props.actionHandler({
+	    	controller: "data",
+	    	method: "initialLoad",
+	    }, {}, function(err, data){
+	    	if (err){
+	    		return console.log("Error loading initial data", err);
+	    	}
+
+	    	self.setState({
+	    		loading: false
+	    	}, function(){
+	    		self.dataDidLoad();
+	    	});
+	    });
+	},	
+	componentDidMount: function(){
+		var self = this;
+
+		window.setTimeout(self.loadData, 200);
+	},
+	dataDidLoad: function() {
+		var self = this;
+
+		
 		self.getLatex();
 		self.getVisuals(function(){
 			var controllers = [];
@@ -367,6 +393,9 @@ var PaperBase = {
 	},
 	render: function(){
 		var self = this;
+		if (self.state.loading){
+			return <Spinner />;
+		}
 		if (!self.state.latex) return null;
 
 		var toc = <div className="p-paper__toc">

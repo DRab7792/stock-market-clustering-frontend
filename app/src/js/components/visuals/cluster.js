@@ -39,10 +39,8 @@ var clusters = {
 
 		self.options.actionHandler({
 	    	controller: "data",
-	    	method: "calcClusters",
-	    }, {
-	    	clusters: self.data.k 
-	    }, function(err, res){
+	    	method: "getClusters",
+	    }, {}, function(err, res){
 			if (err){
 				return console.log("Error getting companies", err);
 			}
@@ -63,6 +61,7 @@ var clusters = {
 				var node = {
 					name: cur.get("name"),
 					cluster: clusterId,
+					clusterName: curCluster.name,
 					radius: 10,
 					distance: cur.get("cluster").distFromCenter,
 					center: cur.get("cluster").isCenter
@@ -236,8 +235,8 @@ var clusters = {
         //Draw the legend for the edge styles
         var styles = {
         	"": "Distance x 1",
-        	"__dash": "Distance x 100",
-        	"__double-dash": "Distance x 1000"
+        	"__dash": "Distance x 10",
+        	"__double-dash": "Distance x 100"
         };
         var offset = 70;
         _.each(Object.keys(styles), function(classSuffix){
@@ -349,11 +348,16 @@ var clusters = {
         			str += "<tspan dy='1em' x='0' class='" + self.classPrefix + "__info-company'>" + cur + "</tspan>";
         		});
 
-            	str += "<tspan dy='2em' x='0'>Cluster " + d.cluster + "</tspan>";
+            	str += "<tspan dy='2em' x='0'>" + d.clusterName + "</tspan>";
 
             	str += "<tspan dy='2em' x='0'>Distance: " + d.distance.toFixed(2) + "</tspan>";
             	return str;
             });
+	},
+	recalcButtons: function(){
+		var self = this;
+
+
 	},
 	dragstarted: function(d) {
         if (!d3.event.active) this.force.alphaTarget(0.1).restart();

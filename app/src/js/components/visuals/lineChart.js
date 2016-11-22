@@ -10,8 +10,10 @@ var lineChart = {
 	classPrefix: "c-lineChart",
 	data: {
 		sectors: [],
+		clusters: [],
 		lines: [],
 		maxY: 0,
+		groups: [],
 		function: "average",
 		minY: 1000,
 		colors: config.app.chartColors,
@@ -23,6 +25,7 @@ var lineChart = {
 		var self = this;
 		self.options = options || {};
 
+		//Set function
 		if (
 			self.options.props && 
 			self.options.props.get("meta") &&
@@ -30,36 +33,124 @@ var lineChart = {
 			self.options.props.get("meta").data.function
 		) self.data.function = self.options.props.get("meta").data.function;
 
+		if (
+			self.options.props && 
+			self.options.props.get("meta") &&
+			self.options.props.get("meta").data && 
+			self.options.props.get("meta").data.groups
+		) self.data.groups = self.options.props.get("meta").data.groups;
+
 		self.loadData(function(){
 			self.prepareData();
 			self.draw();
-			self.setupDefault();
+			self.setupDefaults();
 		});
 	},
-	setupDefault: function(){
+	setupDefaults: function(){
+		var self = this;
+
+		if (_.contains(self.data.groups, "sectors")) self.setupDefaultSectors();
+		if (_.contains(self.data.groups, "clusters")) self.setupDefaultClusters();
+	},
+	setupDefaultSectors: function(){
 		var self = this;
 		
 		if (
 			!self.options.props || 
 			!self.options.props.get("meta") ||
-			!self.options.props.get("meta").data || 
-			!self.options.props.get("meta").data.defaults
+			!self.options.props.get("meta").default || 
+			!self.options.props.get("meta").default.sectors
 		) return;
 
 		//Get Defaults
-		var defaults = self.options.props.get("meta").data.defaults;
+		var defaultSectors = self.options.props.get("meta").default.sectors;
 
 		//Iterate through sectors
 		self.data.sectors.forEach(function(cur, i){
-			var curSectorLabel = cur.models[0].get("category").sector;
+			var curSectorLabel = cur.name;
 
 			//If the current sector is not in the defaults, fade them
-			if (!_.contains(defaults, curSectorLabel)){
+			if (!_.contains(defaultSectors, curSectorLabel)){
+				self.legendClick(i);
+			}
+		});
+	},
+	setupDefaultClusters: function(){
+		var self = this;
+		
+		if (
+			!self.options.props || 
+			!self.options.props.get("meta") ||
+			!self.options.props.get("meta").default || 
+			!self.options.props.get("meta").default.clusters
+		) return;
+
+		//Get Defaults
+		var defaultClusters = self.options.props.get("meta").default.clusters;
+
+		//Iterate through clusters
+		self.data.clusters.forEach(function(cur, i){
+			var curLabel = cur.name;
+
+			//If the current sector is not in the defaults, fade them
+			if (!_.contains(defaultClusters, curLabel)){
 				self.legendClick(i);
 			}
 		});
 	},
 	loadData: function(callback){
+		var self = this;
+
+		async.series([
+			function(done){
+				if (!_.contains(self.data.groups, "sectors")) return done();
+
+				self.loadSectorData(function(){
+					return done();
+				});
+			},
+			function(done){
+				if (!_.contains(self.data.groups, "clusters")) return done();
+
+				self.loadClusterData(function(){
+					return done();
+				});
+			}
+		], function(){
+			return callback();
+		});
+	},
+	loadClusterData: function(callback){
+		var self = this;
+
+		//Call the data controller	
+		self.options.actionHandler({
+	    	controller: "data",
+	    	method: "getClusters",
+	    }, {}, function(err, res){
+			if (err){
+				return console.log("Error getting companies", err);
+			}
+
+			var clusters = res.clusters;
+
+			self.options.actionHandler({
+				controller: "data",
+	    		method: "calculateData",
+			}, {
+				func: self.data.function,
+				groups: clusters
+			}, function(err, res){
+				if (err){
+					return console.log("Error calculating data", err);
+				}
+
+				self.data.clusters = res;
+				return callback();
+			});
+		});
+	},
+	loadSectorData: function(callback){
 		var self = this;
 		
 		if (
@@ -67,7 +158,7 @@ var lineChart = {
 			!self.options.props.get("meta") ||
 			!self.options.props.get("meta").data || 
 			!self.options.props.get("meta").data.sectors
-		) return;
+		) return callback();
 
 		var sectors = self.options.props.get("meta").data.sectors;
 
@@ -87,7 +178,7 @@ var lineChart = {
 	    		method: "calculateData",
 			}, {
 				func: self.data.function,
-				sectors: res
+				groups: res
 			}, function(err, res){
 				if (err){
 					return console.log("Error calculating data", err);
@@ -103,17 +194,18 @@ var lineChart = {
 
 		var lines = [];
 
-		self.data.sectors.forEach(function(curSector, i){
-			var curSectorLabel = curSector.name;
-			var sectorLines = [];
+		//Prepare group data
+		function prepareGroupData(curGroup, i){
+			var curGroupLabel = curGroup.name;
+			var groupLines = [];
 			var curLine = {
-				sector: curSectorLabel,
+				group: curGroupLabel,
 				color: self.data.colors[i],
 				points: []
 			};
 
-			_.each(Object.keys(curSector.ranges), function(curDate){
-				var yVal = curSector.ranges[curDate];
+			_.each(Object.keys(curGroup.ranges), function(curDate){
+				var yVal = curGroup.ranges[curDate];
 
 				var momentDate = moment(curDate, "YYYY-MM-DD");
 
@@ -145,20 +237,27 @@ var lineChart = {
 				curLine.points.push(point);
 			});
 
-			sectorLines.push(curLine);
+			groupLines.push(curLine);
 
-			lines.push(sectorLines);
-		});
+			lines.push(groupLines);
+		}
 
-		//Form the legend data
-		self.data.sectors.forEach(function(curSector, i){
-			var curSectorLabel = curSector.name;
+		//Prepare range data for both sectors and clusters
+		self.data.sectors.forEach(prepareGroupData);
+		self.data.clusters.forEach(prepareGroupData);
+
+		function prepareLegendData(curGroup, i){
+			var curGroupLabel = curGroup.name;
 			var color = self.data.colors[i];
 			self.data.legend.push({
 				color: color,
-				label: curSectorLabel
+				label: curGroupLabel
 			});
-		});
+		}
+
+		//Form the legend data
+		self.data.sectors.forEach(prepareLegendData);
+		self.data.clusters.forEach(prepareLegendData);
 
 		self.data.lines = lines;
 	},
@@ -172,15 +271,15 @@ var lineChart = {
 			return;
 		}
 
-		//Get the frequencies of all the companies by category
-		self.data.sectors.forEach(function(curSector, i){
-			var curSectorLabel = curSector.name;
-			var sectorLines = [];
+		//Prepare line data for each group
+		function prepareGroupData(curGroup, i){
+			var curGroupLabel = curGroup.name;
+			var groupLines = [];
 
 			//Iterate through the sector's companies
-			_.each(curSector.models, function(curComp){
+			_.each(curGroup.models, function(curComp){
 				var curLine = {
-					sector: curSectorLabel,
+					group: curGroupLabel,
 					color: self.data.colors[i],
 					companyName: curComp.get("name"),
 					points: []
@@ -234,25 +333,33 @@ var lineChart = {
 					curLine.points.push(point);
 				});
 
-				sectorLines.push(curLine);
+				groupLines.push(curLine);
 			});
 
-			lines.push(sectorLines);
-		});
+			lines.push(groupLines);
+		}
+
+		//Get the frequencies of all the companies by category
+		self.data.sectors.forEach(prepareGroupData);
+		self.data.clusters.forEach(prepareGroupData);
 
 		//Pad the x axis
 		self.data.startDate.subtract(10, 'days');
 		self.data.endDate.add(10, 'days');
 
-		//Form the legend data
-		self.data.sectors.forEach(function(curSector, i){
-			var curSectorLabel = curSector.name;
+		//Prepare legend data
+		function prepareLegendData(curGroup, i){
+			var curGroupLabel = curGroup.name;
 			var color = self.data.colors[i];
 			self.data.legend.push({
 				color: color,
-				label: curSectorLabel
+				label: curGroupLabel
 			});
-		});
+		}
+
+		//Form the legend data
+		self.data.sectors.forEach(prepareLegendData);
+		self.data.clusters.forEach(prepareLegendData);
 
 		//Save lines
 		self.data.lines = lines;
@@ -389,7 +496,7 @@ var lineChart = {
 		self.lines = lineContainer;
 
 		//Add the legend
-		var legendGap = 50;
+		var legendGap = (self.data.legend.length < 6) ? 50 : 25;
 		var legend = svg.append("g")
 			.attr("class", self.classPrefix + "__legend");
 
@@ -413,20 +520,28 @@ var lineChart = {
 				self.legendClick(i);
 			});
 
+		var clusterRegex = /Cluster\s[0-9]/i;
 		legend.selectAll("." + self.classPrefix + "__legend-label")
 			.data(self.data.legend)
 			.enter().append("text")
 			.attr("class", self.classPrefix + "__legend-label")
 			.attr("transform", function(d, i){
-				var offset = (d.label.indexOf(" ") === -1) ? -3 : -10;
+				var offset = (
+					d.label.indexOf(" ") === -1 || 
+					clusterRegex.test(d.label)
+				) ? -3 : -10;
 				return "translate(" + ((width - margin.right) + 20) + ", " + (margin.top + (i * legendGap) + offset) + ")";
 			})
 			.html(function(d){
-				var str = "";
-				var lines = d.label.split(" ");
-				str += "<tspan dy='1em' x='0'>" + lines[0] + "</tspan>";
-				if (lines.length > 1) str += "<tspan dy='1em' x='0'>" + lines[1] + "</tspan>";
-				return str;
+				if (clusterRegex.test(d.label)){
+					return "<tspan dy='1em' x='0'>" + d.label + "</tspan>";
+				}else{
+					var str = "";
+					var lines = d.label.split(" ");
+					str += "<tspan dy='1em' x='0'>" + lines[0] + "</tspan>";
+					if (lines.length > 1) str += "<tspan dy='1em' x='0'>" + lines[1] + "</tspan>";
+					return str;
+				}
 			})
 			.attr("id", function(d, i){
 				return "label" + i;

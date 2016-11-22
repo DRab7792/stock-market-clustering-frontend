@@ -96,13 +96,11 @@ Application.prototype.startApp = function(){
 
 
 	self.controllers.pages.initialLoad(function(){
-		self.controllers.data.initialLoad(function(){
-			if (window.localStorage.hash && window.localStorage.hash !== ""){
-				self.router.navigate(window.localStorage.hash);
-			}else{
-				self.controllers.pages.showHome();	
-			}
-		});
+		if (window.localStorage.hash && window.localStorage.hash !== ""){
+			self.router.navigate(window.localStorage.hash);
+		}else{
+			self.controllers.pages.showHome();	
+		}
 	});
 };
 
