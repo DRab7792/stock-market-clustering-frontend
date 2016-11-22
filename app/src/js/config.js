@@ -9,12 +9,15 @@ config.app = {
 	},
 	movingAvgWindow: 15,
 	chartColors: [
-		"#F15A5A", 
-		"#F0C419", 
+		"#F15A5A",  
+		"#FFA500",
+		"#F0C419",
 		"#4EBA6F", 
 		"#2D95BF", 
-		"#955BA5"
+		"#955BA5",
+		"#FF69B4"
 	],
+	// chartColors: ["#8e8e93", "#ff2555", "#ff3b30", "#ff9500", "#ffcc00", "#3ed964", "#5ac8fa", "#2aaadc", "#07aff0", "#5856d6"],
 	debug: false
 };
 

@@ -192,7 +192,7 @@ var lineChart = {
 	prepareRangeData: function(){
 		var self = this;
 
-		var lines = [];
+		var lines = [], lineI = 0;
 
 		//Prepare group data
 		function prepareGroupData(curGroup, i){
@@ -200,7 +200,7 @@ var lineChart = {
 			var groupLines = [];
 			var curLine = {
 				group: curGroupLabel,
-				color: self.data.colors[i],
+				color: self.data.colors[lineI],
 				points: []
 			};
 
@@ -240,19 +240,24 @@ var lineChart = {
 			groupLines.push(curLine);
 
 			lines.push(groupLines);
+
+			lineI++;
 		}
 
 		//Prepare range data for both sectors and clusters
 		self.data.sectors.forEach(prepareGroupData);
 		self.data.clusters.forEach(prepareGroupData);
 
+		var legendI = 0;
 		function prepareLegendData(curGroup, i){
 			var curGroupLabel = curGroup.name;
-			var color = self.data.colors[i];
+			var color = self.data.colors[legendI];
 			self.data.legend.push({
 				color: color,
 				label: curGroupLabel
 			});
+
+			legendI++;
 		}
 
 		//Form the legend data
