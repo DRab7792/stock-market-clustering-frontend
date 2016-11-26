@@ -9,8 +9,8 @@ config.app = {
 	},
 	movingAvgWindow: 15,
 	chartColors: [
-		"#F15A5A",  
-		"#FFA500",
+		"#FF3A3A",  
+		"#FF7F00",
 		"#F0C419",
 		"#4EBA6F", 
 		"#2D95BF", 

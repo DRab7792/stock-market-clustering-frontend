@@ -149,65 +149,74 @@ var Header = React.createBackboneClass({
 	},
 	render: function(){
 		var self = this;
+
+		var nav = null;
+
 		if (
-			!Object.keys(this.state.pages).length ||
-			!self.state.papers.paper
-		) return null;
+			Object.keys(this.state.pages).length &&
+			self.state.papers.paper
+		){
+			var links = _.map(this.state.nav, function(cur){
+				//Get the data
+				var pageId = 0;
 
-		var links = _.map(this.state.nav, function(cur){
-			//Get the data
-			var pageId = 0;
+				if (!cur['object_id']){ 
+					return;
+				}else{
+					pageId = cur['object_id'];
+				}
 
-			if (!cur['object_id']){ 
-				return;
-			}else{
-				pageId = cur['object_id'];
-			}
+				if (!self.state.pages[pageId]){
+					console.log("Could not find page for nav item", cur);
+					return;
+				}
 
-			if (!self.state.pages[pageId]){
-				console.log("Could not find page for nav item", cur);
-				return;
-			}
+				var page = self.state.pages[pageId];
 
-			var page = self.state.pages[pageId];
+				//Don't allow proposal in the header if there is no paper for it
+				if (page.slug === "proposal" && !self.state.papers.proposal){
+					return;
+				}
 
-			//Don't allow proposal in the header if there is no paper for it
-			if (page.slug === "proposal" && !self.state.papers.proposal){
-				return;
-			}
+				//Form dropdowns
+				var dropdown = null;
+				if (page.slug === "paper"){
 
-			//Form dropdowns
-			var dropdown = null;
-			if (page.slug === "paper"){
+					var visibleClass = (self.state.activeDropdown === "paper") ? "c-header__dropdown__visible" : "";
 
-				var visibleClass = (self.state.activeDropdown === "paper") ? "c-header__dropdown__visible" : "";
+					dropdown = <SectionList
+						source={page.slug}
+						router={self.props.router}
+						extraClasses={"c-header__dropdown "+visibleClass}
+						sections={self.state.papers.paper.get("sections")}
+					/>;
+				}else if (page.slug === "proposal"){
 
-				dropdown = <SectionList
-					source={page.slug}
-					router={self.props.router}
-					extraClasses={"c-header__dropdown "+visibleClass}
-					sections={self.state.papers.paper.get("sections")}
-				/>;
-			}else if (page.slug === "proposal"){
+					var visibleClass = (self.state.activeDropdown === "proposal") ? "c-header__dropdown__visible" : "";
 
-				var visibleClass = (self.state.activeDropdown === "proposal") ? "c-header__dropdown__visible" : "";
+					dropdown = <SectionList
+						source={page.slug}
+						router={self.props.router}
+						extraClasses={"c-header__dropdown "+visibleClass}
+						sections={self.state.papers.proposal.get("sections")}
+					/>;
+				}
 
-				dropdown = <SectionList
-					source={page.slug}
-					router={self.props.router}
-					extraClasses={"c-header__dropdown "+visibleClass}
-					sections={self.state.papers.proposal.get("sections")}
-				/>;
-			}
+				var extraClass = (self.props.page === page.slug) ? "c-header__link__selected" : "";
 
-			var extraClass = (self.props.page === page.slug) ? "c-header__link__selected" : "";
+				//Render link
+				return <li className={"c-header__link "+extraClass} data-slug={page.slug} key={page.slug}>
+					<span className="c-header__link__parent" onClick={self.handleNavClick} data-route={page.slug}>{page.title}</span>
+					{dropdown}
+				</li>;
+			});
 
-			//Render link
-			return <li className={"c-header__link "+extraClass} data-slug={page.slug} key={page.slug}>
-				<span className="c-header__link__parent" onClick={self.handleNavClick} data-route={page.slug}>{page.title}</span>
-				{dropdown}
-			</li>;
-		});
+			nav = <nav className="c-header__nav l-grid8" >
+				<ul className="c-header__navLinks">
+					{links}
+				</ul>
+			</nav>;
+		}
 
 		var assetsUrl = config.app.assetsUrl;
 
@@ -216,11 +225,7 @@ var Header = React.createBackboneClass({
 				<img className="c-header__logo-icon" src={assetsUrl+"logo-no-text.svg"} />
 				<img className="c-header__logo-text" src={assetsUrl+"logo-text.svg"} />
 			</div>
-			<nav className="c-header__nav l-grid8" >
-				<ul className="c-header__navLinks">
-					{links}
-				</ul>
-			</nav>
+			{nav}
 		</header>);
 	}
 });

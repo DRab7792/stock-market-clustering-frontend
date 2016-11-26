@@ -139,6 +139,11 @@ DataController.prototype.sortCompaniesBySector = function(){
 		curSector.state = curSector.states.LOADED;
 
 		curSector.name = curSector.models[0].get("category").sector;
+
+		curSector.description = {
+			sector: curSector.name,
+			companies: curSector.models.length
+		};
 	});
 
 	self.sectors = sectors;
@@ -172,7 +177,7 @@ DataController.prototype.calculateData = function(options, callback){
 	}
 
 	function checkRanges(curGroup){
-		if (curGroup.state < curGroup.states.RANGES) curGroup.getStdDevVariances();
+		if (curGroup.state < curGroup.states.RANGES) curGroup.getStdDevRanges();
 	}
 
 	if (func === "stdDeviation"){
@@ -346,6 +351,14 @@ DataController.prototype.calcClusters = function(options, callback){
 
 		curCluster.name = "Cluster " + i;
 
+		curCluster.description = {
+			cluster: {
+				name: curCluster.name,
+				attr: curCluster.center.get("preppedAttributes")
+			},
+			companies: curCluster.models.length
+		}
+
 		_.each(curCluster.models, function(curComp){
 			var cur = {};
 			if (curComp.get("id") === center.get("id")){
@@ -415,16 +428,24 @@ DataController.prototype.combineGroups = function(){
 				return;
 			}
 			var compSector = curComp.get("category").sector,
-				key = clusterName + compSector,
-				description = clusterName + ", " + compSector;
+				key = clusterName + compSector;
 
 			if (!combined[key]){
 				combined[key] = new CompanyCollection();
 
-				combined[key].description = description;
+				combined[key].description = {
+					sector: compSector,
+					cluster: {
+						name: clusterName,
+						attr: curCluster.center.get("preppedAttributes")
+					},
+					companies: 0
+				};
 			}
 
 			combined[key].add(curComp);
+
+			combined[key].description.companies++;
 		});
 	});
 

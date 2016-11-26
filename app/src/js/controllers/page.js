@@ -59,6 +59,8 @@ PageController.prototype.loadOptions = function(callback){
 
 		self.wpOptions = res;
 
+		console.log("WP Options", res);
+
 		return callbackIn();
 	});
 };

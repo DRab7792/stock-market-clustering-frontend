@@ -461,6 +461,10 @@ var lineChart = {
 		//Set up the scales
 		var margin = {top: 50, right: 100, bottom: 80, left: 60};
 
+		if (self.data.function === "ranges"){
+			margin.top += 50;
+		}
+
 		// console.log(self.data.lines);
 		var dates = self.data.lines[0][0].points.length;
 		var minX = margin.left;
@@ -513,7 +517,14 @@ var lineChart = {
 		svg.selectAll("." + self.classPrefix + "__axis text")
 			.attr("class", self.classPrefix + "__axis-text");
 
-		
+		//Add label for range charts
+		if (self.data.function === "ranges"){
+			console.log("Adding range label");
+			svg.append("text")
+				.attr("class", self.classPrefix + "__range-label")
+				.attr("text-anchor", "middle")
+				.attr("transform", "translate(" + (width / 2) + ", " + (margin.top * .75) + ")")
+		}
 
 		//Draw chart lines
 		var lineContainer = svg.append("g")
@@ -550,15 +561,7 @@ var lineChart = {
 					.attr("stroke", function(d){
 						return cur.color;
 					})
-					.on("mouseover", function(){
-						// console.log(this);
-						if (cur.companyName){ console.log("Company", cur.companyName); }
-						else if (cur.description){ console.log("Description", cur.description); }
-						// d3.select(this).attr("class", self.classPrefix + "__line " + self.classPrefix + "__line__bold");
-					})
-					.on("mouseout", function(){
-						// d3.select(this).attr("class", self.classPrefix + "__line");
-					});
+					.on("mouseover", self.updateLabel.bind(self, cur, lineNum));
 
 				lineNum++;
 			});
@@ -654,6 +657,57 @@ var lineChart = {
 		var self = this;
 
 		self.container.addClass("c-visual__graphic__show");
+	},
+	updateLabel: function(cur, lineNum){
+		var self = this;
+
+		//Only apply to range charts
+		if (self.data.function !== "ranges") return;
+
+		//Is the line showing?
+		var lineGroup = self.svg.select("#group" + lineNum);
+		var isFaded = lineGroup.classed(self.classPrefix + "__group__faded");
+		if (isFaded) return;
+
+		var label = "";
+
+		//Name of group
+		if (cur.group){
+			label += "<tspan dx='30' class='" + self.classPrefix + "__range-label-block'>";
+			label += "<tspan style='font-weight: bold;'>" + cur.group + "</tspan>";
+			label += "</tspan>"; 
+		}
+
+		//Number of companies in group
+		if (cur.description.companies){
+			label += "<tspan dx='30' class='" + self.classPrefix + "__range-label-block'>";
+			label += "<tspan style='font-weight: bold;'>Companies: </tspan>";
+			label += "<tspan>" + cur.description.companies + "</tspan>";
+			label += "</tspan>"; 
+		}
+
+		//Sector of group
+		if (cur.description.sector){
+			label += "<tspan dx='30' class='" + self.classPrefix + "__range-label-block'>";
+			label += "<tspan style='font-weight: bold;'>Sector: </tspan>";
+			label += "<tspan>" + cur.description.sector + "</tspan>";
+			label += "</tspan>";
+		}
+
+		//Cluster of group
+		if (cur.description.cluster){
+			label += "<tspan dx='30' class='" + self.classPrefix + "__range-label-block'>";
+			label += "<tspan style='font-weight: bold;'>Cluster: </tspan>";
+			label += "<tspan>" + cur.description.cluster.name + "</tspan>";
+			var attrs = "Assets ~ " + cur.description.cluster.attr.Assets.toDollar() + " - ";
+			attrs += "Profit ~ " + cur.description.cluster.attr.ProfitLoss.toDollar();
+			label += "<tspan> (" + attrs + ") </tspan>";
+			label += "</tspan>"; 
+		}
+
+		self.svg.select("." + self.classPrefix + "__range-label")
+			.attr("fill", cur.color)
+			.html(label);
 	},
 	legendClick: function(index){
 		var self = this;

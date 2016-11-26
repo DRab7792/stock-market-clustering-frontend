@@ -66,7 +66,7 @@ var companies = Backbone.Collection.extend({
 			return callback();
 		});
 	},
-	getStdDevVariances: function(){
+	getStdDevRanges: function(){
 		var self = this;
 
 		//Get all the dates
@@ -82,7 +82,7 @@ var companies = Backbone.Collection.extend({
 
 		dates = dates.splice(config.app.movingAvgWindow);
 	
-		var num = 0, ranges = {};
+		var num = 0, ranges = {}, prevVal = 0;
 		_.each(dates, function(curDate){
 			var sum = 0, max = -10, min = 10;
 
@@ -100,7 +100,13 @@ var companies = Backbone.Collection.extend({
 				}
 			});
 
-			ranges[curDate.format("YYYY-MM-DD")] = (max - min); //sumSqrd / (num - 1);
+			//TODO - better fix for this error
+			if (max - min === 0){
+				ranges[curDate.format("YYYY-MM-DD")] = prevVal;
+			}else{
+				ranges[curDate.format("YYYY-MM-DD")] = (max - min);
+				prevVal = max - min;
+			}
 		});
 
 		self.ranges = ranges;

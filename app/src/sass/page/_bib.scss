@@ -9,6 +9,12 @@ $font-size: $larger-font-size;
 	font-size: $font-size;
 	line-height: $line-height;
 
+	&__download{
+		font-size: 0.9em;
+		display: inline-block;
+		margin: 0px 5px 0px;
+	}
+
 	&__list{
 		list-style-type: decimal;
 		padding-left: 30px;

@@ -121,7 +121,7 @@ $legend-fade: 0.3;
 
 	&__line{
 		stroke-width: 1px;
-		fill: rgba(0,0,0,0);
+		fill: none;
 
 		&__bold{
 			stroke-width: 5px;
@@ -130,6 +130,11 @@ $legend-fade: 0.3;
 		&__faded{
 			opacity: $legend-fade;
 		}
+	}
+
+	&__range-label{
+		font-family: $body-font;
+		font-size: $base-font-size;
 	}
 }
 

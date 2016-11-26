@@ -24,7 +24,8 @@ var PaperBase = {
 	    	tooltipLoc: null,
 	    	loading: true,
 	    	viewableVisuals: [],
-	    	initialScroll: true
+	    	initialScroll: true,
+	    	pdfUrl: null
 	    };
 	},
 	getLatex: function(callback){
@@ -163,6 +164,29 @@ var PaperBase = {
 		}
 		return adjStr;
 	},
+	getPDFUrl: function(){
+		var self = this;
+
+		this.props.actionHandler({
+	    	controller: "pages",
+	    	method: "wpOptions",
+	    	isVar: true,
+	    }, {}, function(err, res){
+			if (err){
+				return console.log("Error getting options", err);
+			}
+
+			var source = self.props.source;
+
+			if (!res.theme[source + '-pdf']){
+				return console.log("Error getting pdf", err);
+			}
+
+			self.setState({
+				pdfUrl: res.theme[source + '-pdf']
+			});
+		});
+	},
 	getVisuals: function(callback){
 		var self = this;
 		var callbackIn = (callback) ? callback : function(){};
@@ -206,6 +230,8 @@ var PaperBase = {
 	componentDidMount: function(){
 		var self = this;
 
+		self.getPDFUrl();
+
 		window.setTimeout(self.loadData, 200);
 	},
 	dataDidLoad: function() {
@@ -243,7 +269,7 @@ var PaperBase = {
 		//Scroll to section after DOM is fully loaded
 		window.setTimeout(function(){
 			self.scrollToSection();
-		}, 300);
+		}, 600);
 
 		$(".p-wrapper").scroll(function(){
 			if (self.state.initialScroll) return;
@@ -410,10 +436,21 @@ var PaperBase = {
 		var tooltip = self.formTooltip();
 
 		var sections = self.formSections();
+
+		var pdfLink = null;
+
+		if (self.state.pdfUrl){
+			pdfLink = <a href={self.state.pdfUrl} className="p-paper__download" target="_blank">
+				<i className="fa fa-file-pdf-o"></i>
+			</a>;
+		}
 		
 		return (<div className="p-paper">
 			{tooltip}
-			<h2 className="p-paper__title">{this.props.source.toTitleCase()}</h2>
+			<h2 className="p-paper__title">
+				{this.props.source.toTitleCase()}
+				{pdfLink}
+			</h2>
 			{toc}
 			{sections}
 		</div>);

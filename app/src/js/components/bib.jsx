@@ -9,7 +9,8 @@ var React = require('react'),
 var Bibliography = React.createBackboneClass({
 	getInitialState: function() {
 	    return {
-	    	bibtex: null
+	    	bibtex: null,
+	    	downloadUrl: null
 	    };
 	},
 	getBibtex: function(callback){
@@ -33,8 +34,25 @@ var Bibliography = React.createBackboneClass({
 	componentDidMount: function() {
 		var self = this;
 
-
+		self.getDownloadUrl();
 		self.getBibtex();
+	},
+	getDownloadUrl: function(){
+		var self = this;
+
+		this.props.actionHandler({
+	    	controller: "pages",
+	    	method: "wpOptions",
+	    	isVar: true,
+	    }, {}, function(err, res){
+			if (err){
+				return console.log("Error getting options", err);
+			}
+
+			self.setState({
+				downloadUrl: res.theme.bibliography
+			});
+		});
 	},
 	formSources: function(){
 		var self = this;
@@ -59,9 +77,18 @@ var Bibliography = React.createBackboneClass({
 
 		var sources = self.formSources();
 
-		// console.log("Render");
+		var link = null;
+		if (self.state.downloadUrl){
+			link = <a href={self.state.downloadUrl} className="p-bib__download" target="_blank">
+				<i className="fa fa-cloud-download"></i>
+			</a>
+		}
+		
 		return (<div className="p-bib">
-			<h2 className="p-bib__title">Sources</h2>
+			<h2 className="p-bib__title">
+				{"Sources"}
+				{link}
+			</h2>
 			{sources}
 		</div>);
 	}

@@ -61,6 +61,14 @@ $font-size: $larger-font-size;
 		margin: 0px 0px 10px;
 	}
 
+	&__download{
+		font-size: 0.8em;
+		display: inline-block;
+		margin: 0px 5px 0px;
+		position: relative;
+	    top: -2.5px;
+	}
+
 	&__subheading{
 		letter-spacing: 1px;
 		margin: 0px 0px 10px;
