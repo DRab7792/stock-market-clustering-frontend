@@ -11,6 +11,7 @@ var lineChart = {
 	data: {
 		sectors: [],
 		clusters: [],
+		combined: [],
 		lines: [],
 		maxY: 0,
 		groups: [],
@@ -51,6 +52,7 @@ var lineChart = {
 
 		if (_.contains(self.data.groups, "sectors")) self.setupDefaultSectors();
 		if (_.contains(self.data.groups, "clusters")) self.setupDefaultClusters();
+		if (_.contains(self.data.groups, "combined")) self.setupDefaultCombined();
 	},
 	setupDefaultSectors: function(){
 		var self = this;
@@ -98,6 +100,29 @@ var lineChart = {
 			}
 		});
 	},
+	setupDefaultCombined: function(){
+		var self = this;
+		
+		if (
+			!self.options.props || 
+			!self.options.props.get("meta") ||
+			!self.options.props.get("meta").default || 
+			!self.options.props.get("meta").default.combined
+		) return;
+
+		//Get Defaults
+		var defaultCombined = self.options.props.get("meta").default.combined;
+
+		//Iterate through combined
+		self.data.combined.forEach(function(cur, i){
+			var curLabel = cur.name;
+
+			//If the current sector is not in the defaults, fade them
+			if (!_.contains(defaultCombined, curLabel)){
+				self.legendClick(i);
+			}
+		});
+	},
 	loadData: function(callback){
 		var self = this;
 
@@ -117,7 +142,42 @@ var lineChart = {
 				});
 			}
 		], function(){
-			return callback();
+			if (!_.contains(self.data.groups, "combined")) return callback();
+
+			self.loadCombinedData(function(){
+				console.log(self.data.combined);
+				return callback();
+			});
+		});
+	},
+	loadCombinedData: function(callback){
+		var self = this;
+
+		//Call the data controller	
+		self.options.actionHandler({
+	    	controller: "data",
+	    	method: "getCombined",
+	    }, {}, function(err, res){
+			if (err){
+				return console.log("Error getting companies", err);
+			}
+
+			var combined = res;
+
+			self.options.actionHandler({
+				controller: "data",
+	    		method: "calculateData",
+			}, {
+				func: self.data.function,
+				groups: combined
+			}, function(err, res){
+				if (err){
+					return console.log("Error calculating data", err);
+				}
+
+				self.data.combined = res;
+				return callback();
+			});
 		});
 	},
 	loadClusterData: function(callback){
@@ -201,6 +261,7 @@ var lineChart = {
 			var curLine = {
 				group: curGroupLabel,
 				color: self.data.colors[lineI],
+				description: curGroup.description,
 				points: []
 			};
 
@@ -247,6 +308,7 @@ var lineChart = {
 		//Prepare range data for both sectors and clusters
 		self.data.sectors.forEach(prepareGroupData);
 		self.data.clusters.forEach(prepareGroupData);
+		self.data.combined.forEach(prepareGroupData);
 
 		var legendI = 0;
 		function prepareLegendData(curGroup, i){
@@ -263,6 +325,7 @@ var lineChart = {
 		//Form the legend data
 		self.data.sectors.forEach(prepareLegendData);
 		self.data.clusters.forEach(prepareLegendData);
+		self.data.combined.forEach(prepareLegendData);
 
 		self.data.lines = lines;
 	},
@@ -287,6 +350,7 @@ var lineChart = {
 					group: curGroupLabel,
 					color: self.data.colors[i],
 					companyName: curComp.get("name"),
+					description: curGroup.description,
 					points: []
 				};
 
@@ -347,6 +411,7 @@ var lineChart = {
 		//Get the frequencies of all the companies by category
 		self.data.sectors.forEach(prepareGroupData);
 		self.data.clusters.forEach(prepareGroupData);
+		self.data.combined.forEach(prepareGroupData);
 
 		//Pad the x axis
 		self.data.startDate.subtract(10, 'days');
@@ -365,6 +430,7 @@ var lineChart = {
 		//Form the legend data
 		self.data.sectors.forEach(prepareLegendData);
 		self.data.clusters.forEach(prepareLegendData);
+		self.data.combined.forEach(prepareLegendData);
 
 		//Save lines
 		self.data.lines = lines;
@@ -395,6 +461,7 @@ var lineChart = {
 		//Set up the scales
 		var margin = {top: 50, right: 100, bottom: 80, left: 60};
 
+		// console.log(self.data.lines);
 		var dates = self.data.lines[0][0].points.length;
 		var minX = margin.left;
 		var maxX = width - margin.right;
@@ -485,7 +552,8 @@ var lineChart = {
 					})
 					.on("mouseover", function(){
 						// console.log(this);
-						if (cur.companyName) console.log("Company", cur.companyName);
+						if (cur.companyName){ console.log("Company", cur.companyName); }
+						else if (cur.description){ console.log("Description", cur.description); }
 						// d3.select(this).attr("class", self.classPrefix + "__line " + self.classPrefix + "__line__bold");
 					})
 					.on("mouseout", function(){
@@ -525,7 +593,7 @@ var lineChart = {
 				self.legendClick(i);
 			});
 
-		var clusterRegex = /Cluster\s[0-9]/i;
+		var clusterRegex = /Cluster\s[0-9]/i, combinedRegex = /Combined\s[0-9]/i;
 		legend.selectAll("." + self.classPrefix + "__legend-label")
 			.data(self.data.legend)
 			.enter().append("text")
@@ -533,12 +601,13 @@ var lineChart = {
 			.attr("transform", function(d, i){
 				var offset = (
 					d.label.indexOf(" ") === -1 || 
-					clusterRegex.test(d.label)
+					clusterRegex.test(d.label) || 
+					combinedRegex.test(d.label)
 				) ? -3 : -10;
 				return "translate(" + ((width - margin.right) + 20) + ", " + (margin.top + (i * legendGap) + offset) + ")";
 			})
 			.html(function(d){
-				if (clusterRegex.test(d.label)){
+				if (clusterRegex.test(d.label) || combinedRegex.test(d.label)){
 					return "<tspan dy='1em' x='0'>" + d.label + "</tspan>";
 				}else{
 					var str = "";

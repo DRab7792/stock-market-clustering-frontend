@@ -10,7 +10,9 @@ var MAX_VAL = 999999999999;
 var DataController = function(options){
 	this.app = options.app;	
 	this.companies = [];
+	this.sectors = null;
 	this.clusters = null;
+	this.combined = null;
 };
 
 DataController.prototype.initialLoad = function(options, callback){
@@ -82,7 +84,6 @@ DataController.prototype.getAllCompanies = function(options, callback){
 
 DataController.prototype.getCompaniesBySectors = function(options, callback){
 	var self = this;
-	var sectors = [];
 	var callbackIn = callback ? callback : function(){};
 	//Check the parameters
 	if (!options.sectors){
@@ -94,39 +95,55 @@ DataController.prototype.getCompaniesBySectors = function(options, callback){
 		return callbackIn("No companies");
 	}
 
-	//Form the sectors array, async just in case
-	async.each(options.sectors, function(cur, done){
-		var curSector = new CompanyCollection();
+ 	if (!self.sectors){
+ 		self.sortCompaniesBySector();
+ 	}
 
-		_.each(self.companies.models, function(comp){
-			if (
-				!comp.get("category") || 
-				!comp.get("category").sector
-			){
-				return;
-			}
+ 	//If all sectors are sorted, get the ones specified
+ 	var sectors = [];
 
-			if (comp.get("category").sector === cur){
-				curSector.add(comp);
-			}
-		});
+ 	_.each(self.sectors, function(cur){
+ 		if (_.contains(options.sectors, cur.name)){
+ 			sectors.push(cur);
+ 		}
+ 	});
+
+ 	return callbackIn(null, sectors);
+};
+
+DataController.prototype.sortCompaniesBySector = function(){
+	var self = this;
+	var sectors = {};
+
+	//Form the sectors object
+	_.each(self.companies.models, function(comp){
+		if (
+			!comp.get("category") || 
+			!comp.get("category").sector
+		){
+			return;
+		}
+		var compSector = comp.get("category").sector;
+
+		if (!sectors[compSector]){
+			sectors[compSector] = new CompanyCollection();
+		}
+
+		sectors[compSector].add(comp);
+	});
+
+	//Mark the sectors as loaded and assign names
+	_.each(Object.keys(sectors), function(curKey){
+		var curSector = sectors[curKey];
 
 		curSector.state = curSector.states.LOADED;
 
 		curSector.name = curSector.models[0].get("category").sector;
-
-		sectors.push(curSector);
-
-		return done();
-	}, function(err){
-		//Handle error
-		if (err){
-			return callbackIn(err);
-		}
-
-		//Return array of company collections
-		return callbackIn(null, sectors);
 	});
+
+	self.sectors = sectors;
+
+	return;
 };
 
 //Calculate all data in order if necessary
@@ -360,5 +377,86 @@ DataController.prototype.getClusters = function(options, callback){
 
 	return callbackIn(null, self.clusters);
 };
+
+DataController.prototype.getCombined = function(options, callback){
+	var self = this;
+	var callbackIn = callback ? callback : function(){};
+
+	//Check clusters and sectors
+	if (!self.clusters){
+		return callbackIn("Clusters are not set");
+	}
+
+	if (!self.sectors){
+		return callbackIn("Sectors are not set");
+	}
+
+	//Combine groups if not already set
+	if (!self.combined){
+		self.combineGroups();
+	}
+
+	return callbackIn(null, self.combined);
+};
+
+DataController.prototype.combineGroups = function(){
+	var self = this;
+	var combined = {};
+
+	//Form the combined groups
+	_.each(self.clusters.clusters, function(curCluster){
+		var clusterName = curCluster.name;
+
+		_.each(curCluster.models, function(curComp){
+			if (
+				!curComp.get("category") || 
+				!curComp.get("category").sector
+			){
+				return;
+			}
+			var compSector = curComp.get("category").sector,
+				key = clusterName + compSector,
+				description = clusterName + ", " + compSector;
+
+			if (!combined[key]){
+				combined[key] = new CompanyCollection();
+
+				combined[key].description = description;
+			}
+
+			combined[key].add(curComp);
+		});
+	});
+
+	//Eliminate all combined groups with only one company
+	var i = 1;
+	self.combined = [];
+	_.each(Object.keys(combined), function(curKey){
+		if (combined[curKey].models.length === 1){
+			return;
+		}
+
+		combined[curKey].state = combined[curKey].states.LOADED;
+
+		i++;
+
+		self.combined.push(combined[curKey]);
+	});
+
+	//Sort by size
+	self.combined = _.sortBy(self.combined, function(cur){
+		return -cur.models.length;
+	});
+
+	//Only include the top 5 most populated combined groups
+	self.combined = self.combined.slice(0, 5);
+
+	//Assign names
+	self.combined.forEach(function(cur, i){
+		cur.name = "Combined " + (i + 1);
+	});
+
+	return;
+}
 
 module.exports = DataController;

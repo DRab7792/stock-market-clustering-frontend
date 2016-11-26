@@ -12,6 +12,7 @@ var companies = Backbone.Collection.extend({
 		RANGES: 2
 	},
 	name: '',
+	description: '',
 	variances: [],
 	ranges: {},
 	state: null,
@@ -69,6 +70,12 @@ var companies = Backbone.Collection.extend({
 		var self = this;
 
 		//Get all the dates
+		if (
+			!self.models.length || 
+			!self.models[0].get("stockPrices")
+		){
+			return console.log("No models found");
+		}
 		var dates = _.map(self.models[0].get("stockPrices").models, function(cur){
 			return cur.get("date");
 		});

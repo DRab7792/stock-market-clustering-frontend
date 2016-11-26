@@ -167,13 +167,6 @@ var clusters = {
 			.attr("class", self.classPrefix + "__margin")
 			.attr("x", 0)
 			.attr("y", 0)
-			.attr("width", self.margin.left)
-			.attr("height", self.height)
-
-		self.svg.append("rect")
-			.attr("class", self.classPrefix + "__margin")
-			.attr("x", 0)
-			.attr("y", 0)
 			.attr("width", self.width)
 			.attr("height", self.margin.top);
 
@@ -275,7 +268,7 @@ var clusters = {
 			.force("link", d3.forceLink().id(function(d) { return d.index }))
             .force("collide",d3.forceCollide( function(d){return d.radius + 8; }))
             .force("charge", d3.forceManyBody())
-            .force("center", d3.forceCenter(self.width / 2, self.height / 2))
+            .force("center", d3.forceCenter((self.width / 2) - self.margin.left, (self.height / 2) - self.margin.top))
             .force("y", d3.forceY(0))
             .force("x", d3.forceX(0));
 
