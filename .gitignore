@@ -3,6 +3,6 @@ app/node_modules
 cache
 release
 app/build
-app/src/assets
+app/src/assets/*
 data
 assets/stockMarketFootage.mp4
