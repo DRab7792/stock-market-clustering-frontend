@@ -22,7 +22,7 @@ This is the front end electron app that patners with the Stock Market Clustering
 
 ## Usage
 
-This program is meant to be installed and ran as is or forked from the framework branch in order to use the electron template in other ways.
+This program is meant to be installed and ran as is or forked from the framework tag in order to use the electron template in other ways.
 
 ## Overview
 
