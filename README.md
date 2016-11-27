@@ -1,6 +1,4 @@
-<snippet>
-  <content><![CDATA[
-# ${1:Project Name}
+# Stock Market Clustering Frontend
 
 TODO: Write a project description
 
@@ -39,6 +37,3 @@ This program is meant to be installed and ran as is or forked from the framework
 ## License
 
 See LICENSE.txt
-]]></content>
-  <tabTrigger>readme</tabTrigger>
-</snippet>
