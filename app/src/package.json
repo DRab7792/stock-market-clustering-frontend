@@ -1,5 +1,8 @@
 {
 	"name": "Stock Market Clustering",
-	"version": "v0.0.1",
-	"main": "main.js"
+	"version": "v0.1.1",
+	"main": "main.js",
+	"dependencies": {
+		"open": "0.0.5"
+	}
 }

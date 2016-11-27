@@ -204,21 +204,21 @@ gulp.task('package', function() {
 	        version: 'v1.4.1',
 	        rebuild: false,
 	        packaging: true,
-	        // asar: true,
-	        platforms: ['darwin-x64'],
+	        asar: false,
+	        platforms: ['win32-ia32', 'darwin-x64', 'linux-x64'],
 	        platformResources: {
 	            darwin: {
 	                CFBundleDisplayName: packageJson.name,
 	                CFBundleIdentifier: packageJson.name,
 	                CFBundleName: packageJson.name,
 	                CFBundleVersion: packageJson.version,
-	                icon: 'icons/gulp-electron.icns'
+	                icon: 'icons/icon256.icns'
 	            },
 	            win: {
 	                "version-string": packageJson.version,
 	                "file-version": packageJson.version,
 	                "product-version": packageJson.version,
-	                icon: 'icons/ico-logo.ico'
+	                icon: 'icons/gulp-electron.ico'
 	            }
 	        }
 	    }))
@@ -255,7 +255,7 @@ gulp.task('compile', ['importSassVars', 'sass', 'js', 'assets', 'root', 'importD
 gulp.task('watch', ['importSassVars', 'watchJs', 'watchSass', 'watchAssets']);
 gulp.task('dev', ['compile', 'run']);
 gulp.task('prod', function(){
-	gulp.start("icons");
+	// gulp.start("icons");
 	gulp.start("compile");
 
 	gulp.src('release', {read: false})
