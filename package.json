@@ -3,7 +3,7 @@
   "version": "0.1.1",
   "bundle": "com.stock-clustering",
   "description": "Ana analysis of the stock market through clustering techniques.",
-  "main": "src/app.js",
+  "main": "app/src/app.js",
   "scripts": {
     "test": "DEBUG=web ./index.js"
   },

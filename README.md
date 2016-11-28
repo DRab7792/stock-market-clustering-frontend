@@ -4,11 +4,19 @@ This is the front end electron app that patners with the Stock Market Clustering
 
 ## Installation
 
+1. Go to https://drive.google.com/drive/folders/0B8agtXdZJP3tNDNRU1pRb3lGSGc?usp=sharing and download the correct zip file.
+
+2. Extract the contents.
+
+3. Run the file titled "Stock Market Clustering."
+
+## Development
+
 1. Install Node 6.5 or higher.
 
 2. Install Gulp.
 
-3. Run `npm install`
+3. Run `npm install`.
 
 4. Download the Kaggle dataset from this page https://www.kaggle.com/usfundamentals/us-stocks-fundamentals and place it inthe data folder.
 
