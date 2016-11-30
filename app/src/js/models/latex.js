@@ -39,7 +39,9 @@ var Latex = Backbone.Model.extend({
             endAbstractRegex = /\\end\{abstract\}/i,
             sectionRegex = /\\section\{(.*)\}/i,
             subsectionRegex = /\\subsection\{(.*)\}/i,
-            endRegex = /\\end\{document\}/i;
+            endRegex = /\\end\{document\}/i,
+            startFigureRegex = /\\begin\{figure\}/i,
+            endFigureRegex = /\\end\{figure\}/i;
 
         if (conditions.author) line = line.replace("\\\\", "");
 
@@ -65,6 +67,12 @@ var Latex = Backbone.Model.extend({
         }else if (dateRegex.test(line)){
             var res = dateRegex.exec(line);
             self.set("date", moment(res[1]));
+        }else if (startFigureRegex.test(line)){
+            conditions.figure = true;
+        }else if (endFigureRegex.test(line)){
+            conditions.figure = false;
+        }else if (conditions.figure){
+            //Do nothing for an image, those are indpendant of the app
         }else if (startAbstractRegex.test(line)){
             conditions.abstract = true;
         }else if (endAbstractRegex.test(line)){

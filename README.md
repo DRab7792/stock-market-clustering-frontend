@@ -55,13 +55,4 @@ The visualizations are written in D3JS and stored in /app/src/js/components/visu
 ## License
 
 See LICENSE.txt
-=======
-### Data Manipulation
 
-### Components
-
-### Visualizations
-
-## License
-
-See LICENSE.txt

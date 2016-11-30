@@ -174,34 +174,35 @@ PageController.prototype.loadTex = function(callback){
 }
 
 PageController.prototype.showHome = function(){
-	console.log("home");
+	if (ga) ga('send', 'pageview', 'home');
 	this.app.mainView.render("home");
 };
 
 PageController.prototype.showProposal = function(data){
-	var section = data[0];
-	console.log("proposal", section);
+	var section = (data && data.length) ? data[0] : null;
+	if (ga) ga('send', 'pageview', 'proposal');
 	this.app.mainView.render("proposal", section);
 };
 
 PageController.prototype.showCode = function(){
-	console.log("code");
+	if (ga) ga('send', 'pageview', 'code');
 	this.app.mainView.render("code");
 };
 
 PageController.prototype.showSources = function(){
-	console.log("sources");
+	if (ga) ga('send', 'pageview', 'sources');
 	this.app.mainView.render("sources");
 };
 
 PageController.prototype.showStack = function(){
-	console.log("stack");
+	if (ga) ga('send', 'pageview', 'stack');
 	this.app.mainView.render("stack");
 };
 
+
 PageController.prototype.showPaper = function(data){
-	var section = data[0];
-	console.log("paper", section);
+	var section = (data && data.length) ? data[0] : null;
+	if (ga) ga('send', 'pageview', 'paper');
 	this.app.mainView.render("paper", section);
 };
 
